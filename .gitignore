@@ -1,0 +1,10 @@
+BT/
+*.sln
+*.sln.DotSettings.user
+bin/
+obj/
+*.puml
+.DS_Store
+.idea/
+*.nupkg
+packages/
