@@ -29,36 +29,30 @@ public class MainMenu
                               "4. Викладачі\n" +
                               "0. Вийти");
 
-            Console.Write("Твій вибір: ");
-            var choice = Console.ReadLine();
+            int parseChoice = _helper.ReadInt("Твій вибір: ");
 
-            if (int.TryParse(choice, out int parseChoice))
+            switch (parseChoice)
             {
-                switch (parseChoice)
-                {
-                    case 1:
-                        _studentMenu.RunMenu();
-                        break;
-                    case 2:
-                        _groupMenu.RunMenu();
-                        break;
-                    case 3:
-                        _disciplineMenu.RunMenu();
-                        break;
-                    case 4:
-                        _teacherMenu.RunMenu();
-                        break;
-                    case 0:
-                        isActive = false;
-                        break;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Невідома команда");
-                _helper.PressAnyKey();
+                case 1:
+                    _studentMenu.RunMenu();
+                    break;
+                case 2:
+                    _groupMenu.RunMenu();
+                    break;
+                case 3:
+                    _disciplineMenu.RunMenu();
+                    break;
+                case 4:
+                    _teacherMenu.RunMenu();
+                    break;
+                case 0:
+                    isActive = false;
+                    break;
+                default:
+                    Console.WriteLine("Невідома команда");
+                    _helper.PressAnyKey();
+                    break;
             }
         }
-    
     }
 }

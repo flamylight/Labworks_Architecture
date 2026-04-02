@@ -22,30 +22,25 @@ public class GroupMenu
                               "3. Поділити групу на підгрупи\n" +
                               "0. Вийти");
             
-            Console.Write("Твій вибір: ");
-            var choice = Console.ReadLine();
+            int parseChoice = _helper.ReadInt("Твій вибір: ");
             
-            if (int.TryParse(choice, out int parseChoice))
+            switch (parseChoice)
             {
-                switch (parseChoice)
-                {
-                    case 1:
-                        CreateGroup();
-                        break;
-                    case 2:
-                        AddStudentToGroup();
-                        break;
-                    case 3:
-                        DivideIntoSubgroups();
-                        break;
-                    case 0:
-                        return;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Невідома команда!");
-                _helper.PressAnyKey();
+                case 1:
+                    CreateGroup();
+                    break;
+                case 2:
+                    AddStudentToGroup();
+                    break;
+                case 3:
+                    DivideIntoSubgroups();
+                    break;
+                case 0:
+                    return;
+                default:
+                    Console.WriteLine("Невідома команда!");
+                    _helper.PressAnyKey();
+                    break;
             }
         }
     }
@@ -54,16 +49,15 @@ public class GroupMenu
     {
         Console.Write("Назва групи: ");
         var name = Console.ReadLine();
-
-        Console.Write("Курс: ");
-        int course = _helper.ReadPositiveInt("Курс: ");
+        
+        int course = _helper.ReadInt("Курс: ");
 
         try
         {
             _simulation.CreateGroup(name!, course);
             Console.WriteLine("Успішно додано");
         }
-        catch (GroupValidationException ex)
+        catch (UniversityException ex)
         {
             Console.WriteLine(ex.Message);
         }
@@ -102,7 +96,7 @@ public class GroupMenu
             _simulation.AddStudentToGroup(studentId, groupId);
             Console.WriteLine("Успішно додано!");
         }
-        catch (StudentValidationException ex)
+        catch (UniversityException ex)
         {
             Console.WriteLine(ex.Message);
         }
@@ -130,11 +124,7 @@ public class GroupMenu
             _simulation.DivideIntoSubgroups(groupId);
             Console.WriteLine("Успішно поділено!");
         }
-        catch (NotEnoughStudentsException ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        catch (GroupAlreadyDividedException ex)
+        catch (UniversityException ex)
         {
             Console.WriteLine(ex.Message);
         }

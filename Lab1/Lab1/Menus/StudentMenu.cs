@@ -21,27 +21,22 @@ public class StudentMenu
                               "2. Видати комп'ютер студенту\n" +
                               "0. Вийти");
 
-            Console.Write("Твій вибір: ");
-            var choice = Console.ReadLine();
+            int parseChoice = _helper.ReadInt("Твій вибір: ");
 
-            if (int.TryParse(choice, out int parseChoice))
+            switch (parseChoice)
             {
-                switch (parseChoice)
-                {
-                    case 1:
-                        CreateStudent();
-                        break;
-                    case 2:
-                        ProvideComputerToStudent();
-                        break;
-                    case 0:
-                        return;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Невідома команда!");
-                _helper.PressAnyKey();
+                case 1:
+                    CreateStudent();
+                    break;
+                case 2:
+                    ProvideComputerToStudent();
+                    break;
+                case 0:
+                    return;
+                default:
+                    Console.WriteLine("Невідома команда!");
+                    _helper.PressAnyKey();
+                    break;
             }
         }
     }
@@ -82,7 +77,7 @@ public class StudentMenu
 
         try
         {
-            _simulation.CreateStudent(name, surname, hasComputer);
+            _simulation.CreateStudent(name!, surname!, hasComputer);
             Console.WriteLine("Успішно додано!");
         }
         catch (UniversityException ex)

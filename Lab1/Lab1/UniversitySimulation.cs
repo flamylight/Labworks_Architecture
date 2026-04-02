@@ -1,4 +1,5 @@
 using Lab1.Enums;
+using Lab1.Interfaces;
 using Lab1.Services;
 
 namespace Lab1;
@@ -68,9 +69,9 @@ public class UniversitySimulation
         return _disciplineService.GetDisciplinesByGroup(groupId);
     }
     
-    public void ConductActivity(Guid disciplineId, ActivityType activityType, int hours)
+    public void ConductActivity(Guid disciplineId, ActivityType activityType, int hours, Guid? subGroupId = null)
     {
-        _disciplineService.ConductActivity(disciplineId, activityType, hours);
+        _disciplineService.ConductActivity(disciplineId, activityType, hours, subGroupId);
     }
     
     public Teacher CreateTeacher(string name, string surname)

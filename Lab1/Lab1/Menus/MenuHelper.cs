@@ -19,13 +19,7 @@ public class MenuHelper
                 Console.WriteLine($"{i+1}. {groups[i]}");
             }
 
-            Console.Write("Виберіть групу: ");
-
-            if (!int.TryParse(Console.ReadLine(), out int groupNumber))
-            {
-                Console.WriteLine("Виберіть номер групи!");
-                continue;
-            }
+            int groupNumber = ReadInt("Виберіть групу: ");
 
             if (groupNumber < 1 || groupNumber > groups.Count)
             {
@@ -46,13 +40,7 @@ public class MenuHelper
                 Console.WriteLine($"{i+1}. {students[i]}");
             }
 
-            Console.Write("Виберіть студента: ");
-
-            if (!int.TryParse(Console.ReadLine(), out int studentNumber))
-            {
-                Console.WriteLine("Виберіть номер студента!");
-                continue;
-            }
+            int studentNumber = ReadInt("Виберіть студента: ");
 
             if (studentNumber < 1 || studentNumber > students.Count)
             {
@@ -75,12 +63,7 @@ public class MenuHelper
                 Console.WriteLine($"{i + 1}. {values[i]}");
             }
 
-            Console.Write("Вибір: ");
-            if (!int.TryParse(Console.ReadLine(), out int number))
-            {
-                Console.WriteLine("Введіть номер зі списку!");
-                continue;
-            }
+            int number = ReadInt("Вибір: ");
 
             if (number < 1 || number > values.Length)
             {
@@ -103,12 +86,7 @@ public class MenuHelper
                 Console.WriteLine($"{i + 1}. {values[i]}");
             }
 
-            Console.Write("Вибір: ");
-            if (!int.TryParse(Console.ReadLine(), out int number))
-            {
-                Console.WriteLine("Введіть номер зі списку!");
-                continue;
-            }
+            int number = ReadInt("Вибір: ");
 
             if (number < 1 || number > values.Length)
             {
@@ -120,7 +98,7 @@ public class MenuHelper
         }
     }
 
-    public int ReadPositiveInt(string prompt)
+    public int ReadInt(string prompt)
     {
         while (true)
         {
@@ -131,42 +109,31 @@ public class MenuHelper
                 continue;
             }
 
-            if (value <= 0)
-            {
-                Console.WriteLine("Число має бути більше 0!");
-                continue;
-            }
-
             return value;
         }
     }
 
-        public ActivityType SelectActivityTypeFromList(List<ActivityType> types)
+    public ActivityType SelectActivityTypeFromList(List<ActivityType> types)
+    {
+        while (true)
         {
-            while (true)
+            Console.WriteLine("Оберіть тип активності:");
+            for (int i = 0; i < types.Count; i++)
             {
-                Console.WriteLine("Оберіть тип активності:");
-                for (int i = 0; i < types.Count; i++)
-                {
-                    Console.WriteLine($"{i + 1}. {types[i]}");
-                }
-
-                Console.Write("Вибір: ");
-                if (!int.TryParse(Console.ReadLine(), out int number))
-                {
-                    Console.WriteLine("Введіть номер зі списку!");
-                    continue;
-                }
-
-                if (number < 1 || number > types.Count)
-                {
-                    Console.WriteLine("Число вийшло за межі!");
-                    continue;
-                }
-
-                return types[number - 1];
+                Console.WriteLine($"{i + 1}. {types[i]}");
             }
+
+            int number = ReadInt("Вибір: ");
+
+            if (number < 1 || number > types.Count)
+            {
+                Console.WriteLine("Число вийшло за межі!");
+                continue;
+            }
+
+            return types[number - 1];
         }
+    }
 
     public Guid SelectTeacher(List<Teacher> teachers)
     {
@@ -177,12 +144,7 @@ public class MenuHelper
                 Console.WriteLine($"{i + 1}. {teachers[i].Name} {teachers[i].Surname}");
             }
 
-            Console.Write("Виберіть викладача: ");
-            if (!int.TryParse(Console.ReadLine(), out int number))
-            {
-                Console.WriteLine("Виберіть номер викладача!");
-                continue;
-            }
+            int number = ReadInt("Виберіть викладача: ");
 
             if (number < 1 || number > teachers.Count)
             {
@@ -203,12 +165,7 @@ public class MenuHelper
                 Console.WriteLine($"{i + 1}. {disciplines[i].Name} — {disciplines[i].TotalHours} год.");
             }
 
-            Console.Write("Виберіть дисципліну: ");
-            if (!int.TryParse(Console.ReadLine(), out int number))
-            {
-                Console.WriteLine("Виберіть номер дисципліни!");
-                continue;
-            }
+            int number = ReadInt("Виберіть дисципліну: ");
 
             if (number < 1 || number > disciplines.Count)
             {

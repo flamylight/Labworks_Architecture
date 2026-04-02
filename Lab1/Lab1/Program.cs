@@ -1,4 +1,5 @@
-﻿﻿using Lab1.Menus;
+﻿using Lab1.Interfaces;
+using Lab1.Menus;
 using Lab1.Services;
 
 namespace Lab1;
@@ -18,7 +19,7 @@ class Program
 
         StudentMenu studentMenu = new StudentMenu(simulation);
         GroupMenu groupMenu = new GroupMenu(simulation);
-        DisciplineMenu disciplineMenu = new DisciplineMenu(simulation);
+        DisciplineMenu disciplineMenu = new DisciplineMenu(simulation, universityData);
         TeacherMenu teacherMenu = new TeacherMenu(simulation);
         MainMenu mainMenu = new MainMenu(studentMenu, groupMenu, disciplineMenu, teacherMenu);
         

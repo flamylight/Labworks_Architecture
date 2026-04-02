@@ -12,6 +12,8 @@ public class Discipline
     public Dictionary<ActivityType, List<Guid>> ActivityTeachers { get; set; } = new();
 
     public Dictionary<ActivityType, int> CompletedHours { get; set; } = new();
+    
+    public Dictionary<ActivityType, Dictionary<Guid, int>> SubGroupCompletedHours { get; set; } = new();
 
     public bool IsCreditAwarded { get; set; }
     

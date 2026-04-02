@@ -7,10 +7,12 @@ public class DisciplineMenu
 {
     private readonly MenuHelper _helper = new MenuHelper();
     private readonly UniversitySimulation _simulation;
+    private readonly IUniversityData _universityData;
 
-    public DisciplineMenu(UniversitySimulation simulation)
+    public DisciplineMenu(UniversitySimulation simulation, IUniversityData universityData)
     {
         _simulation = simulation;
+        _universityData = universityData;
     }
 
     public void RunMenu()
@@ -23,15 +25,7 @@ public class DisciplineMenu
                               "3. Провести активність дисципліни\n" +
                               "0. Вийти");
 
-            Console.Write("Твій вибір: ");
-            var choice = Console.ReadLine();
-
-            if (!int.TryParse(choice, out int parseChoice))
-            {
-                Console.WriteLine("Невідома команда!");
-                _helper.PressAnyKey();
-                continue;
-            }
+            int parseChoice = _helper.ReadInt("Твій вибір: ");
 
             switch (parseChoice)
             {
@@ -77,7 +71,7 @@ public class DisciplineMenu
         {
             var activityType = _helper.SelectActivityType();
 
-            int hours = _helper.ReadPositiveInt($"Кількість годин для {activityType}: ");
+            int hours = _helper.ReadInt($"Кількість годин для {activityType}: ");
             activities.Add(new Activity(activityType, hours));
             totalHours += hours;
 
@@ -150,9 +144,23 @@ public class DisciplineMenu
             {
                 var type = kv.Key;
                 var planned = kv.Value;
-                d.CompletedHours.TryGetValue(type, out int done);
-                var status = done >= planned ? "[виконано]" : "[у процесі]";
-                Console.WriteLine($"   - {type}: {done}/{planned} год. {status}");
+                
+                if (type == ActivityType.Lab && d.SubGroupCompletedHours.ContainsKey(type))
+                {
+                    Console.WriteLine($"   - {type}: ");
+                    foreach (var subGroupHours in d.SubGroupCompletedHours[type])
+                    {
+                        var subGroupName = GetSubGroupName(subGroupHours.Key);
+                        var status = subGroupHours.Value >= planned ? "[виконано]" : "[у процесі]";
+                        Console.WriteLine($"     • {subGroupName}: {subGroupHours.Value}/{planned} год. {status}");
+                    }
+                }
+                else
+                {
+                    d.CompletedHours.TryGetValue(type, out int done);
+                    var status = done >= planned ? "[виконано]" : "[у процесі]";
+                    Console.WriteLine($"   - {type}: {done}/{planned} год. {status}");
+                }
             }
         }
 
@@ -186,18 +194,66 @@ public class DisciplineMenu
         var activityTypes = discipline.Activities.Select(a => a.Type).Distinct().ToList();
         var selectedType = _helper.SelectActivityTypeFromList(activityTypes);
 
-        int hours = _helper.ReadPositiveInt("Скільки годин провести: ");
+        if (selectedType == ActivityType.Lab)
+        {
+            var group = groups.First(g => g.Id == groupId);
+            if (group.SubGroups.Count == 0)
+            {
+                Console.WriteLine("Спочатку поділіть групу на підгрупи!");
+                _helper.PressAnyKey();
+                return;
+            }
 
-        try
-        {
-            _simulation.ConductActivity(disciplineId, selectedType, hours);
-            Console.WriteLine("Активність проведено успішно.");
+            var subGroups = group.SubGroups.Select(sgId => new { Id = sgId, Name = GetSubGroupName(sgId) }).ToList();
+            
+            Console.WriteLine("Оберіть підгрупу:");
+            for (int i = 0; i < subGroups.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {subGroups[i].Name}");
+            }
+
+            int subGroupChoice = _helper.ReadInt("Вибір: ");
+            if (subGroupChoice < 1 || subGroupChoice > subGroups.Count)
+            {
+                Console.WriteLine("Невірний вибір!");
+                _helper.PressAnyKey();
+                return;
+            }
+
+            var selectedSubGroupId = subGroups[subGroupChoice - 1].Id;
+            int hours = _helper.ReadInt("Скільки годин провести: ");
+
+            try
+            {
+                _simulation.ConductActivity(disciplineId, selectedType, hours, selectedSubGroupId);
+                Console.WriteLine("Лабораторну роботу проведено успішно для підгрупи.");
+            }
+            catch (UniversityException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
-        catch (UniversityException ex)
+        else
         {
-            Console.WriteLine(ex.Message);
+            int hours = _helper.ReadInt("Скільки годин провести: ");
+
+            try
+            {
+                _simulation.ConductActivity(disciplineId, selectedType, hours);
+                Console.WriteLine("Активність проведено успішно.");
+            }
+            catch (UniversityException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         _helper.PressAnyKey();
+    }
+
+    private string GetSubGroupName(Guid subGroupId)
+    {
+        var subGroup = _universityData.GetSubgroupById(subGroupId);
+        return subGroup?.Name ?? "Невідома підгрупа";
     }
 }

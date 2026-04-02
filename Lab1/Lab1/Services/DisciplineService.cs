@@ -1,5 +1,7 @@
 using Lab1.Enums;
 using Lab1.Exceptions;
+using Lab1.Interfaces;
+using Lab1.Services.Strategies;
 
 namespace Lab1.Services;
 
@@ -7,6 +9,11 @@ public class DisciplineService : IDisciplineService
 {
     private const int MinimumHours = 64;
     private readonly IUniversityData _data;
+    private readonly List<IActivityProgressStrategy> _progressStrategies  = new()
+    {
+        new LabActivityProgressStrategy(),
+        new RegularActivityProgressStrategy()
+    };
 
     public DisciplineService(IUniversityData universityData)
     {
@@ -32,28 +39,33 @@ public class DisciplineService : IDisciplineService
         {
             throw new DisciplineValidationException("Ця дисципліна не викладається на вказаному курсі.");
         }
-        
+
+        if (activities.Any(a => a.Hours <= 0))
+        {
+            throw new DisciplineValidationException("Кількість годин для активності має бути більшою за 0.");
+        }
+
         if (group.SubGroups == null || group.SubGroups.Count == 0)
         {
             throw new DisciplineValidationException("Спочатку поділіть групу на підгрупи.");
         }
-        
+
         if (_data.Disciplines.Any(d => d.GroupId == group.Id && d.Type == type))
         {
             throw new DisciplineValidationException("Така дисципліна вже створена для цієї групи.");
         }
-        
+
         if (type != DisciplineType.BasicsProgramming && activities.Any(a => a.Type == ActivityType.Credit))
         {
             throw new DisciplineValidationException("Залік можливий лише для дисципліни 'Основи програмування'.");
         }
-        
+
         var totalHours = activities.Sum(a => a.Hours);
         if (totalHours < MinimumHours)
         {
             throw new DisciplineValidationException($"На дисципліну має бути не менше {MinimumHours} аудиторних годин.");
         }
-        
+
         foreach (var studentId in group.Students)
         {
             var student = _data.GetStudentById(studentId);
@@ -70,73 +82,72 @@ public class DisciplineService : IDisciplineService
         return  _data.Disciplines.Where(d => d.GroupId == groupId).ToList();
     }
 
-    public void ConductActivity(Guid disciplineId, ActivityType activityType, int hours)
+    public void ConductActivity(Guid disciplineId, ActivityType activityType, int hours, Guid? subGroupId = null)
     {
         var discipline = _data.GetDisciplineById(disciplineId)
             ?? throw new DisciplineValidationException("Дисципліну не знайдено.");
 
-        ValidateActivityConduction(discipline, activityType, hours);
+        var group = _data.GetGroupById(discipline.GroupId)
+            ?? throw new GroupValidationException("Групу не знайдено.");
 
-        UpdateCompletedHours(discipline, activityType, hours);
-        CheckAndAwardCredit(discipline);
+        ValidateHours(hours);
+        ValidateActivityConduction(discipline, group, activityType);
+
+        var strategy = GetProgressStrategy(activityType);
+        strategy.AddHours(discipline, group, activityType, hours, subGroupId);
+        CheckAndAwardCredit(discipline, group);
     }
 
-    private void ValidateActivityConduction(Discipline discipline, ActivityType activityType, int hours)
+    private void ValidateActivityConduction(Discipline discipline, Group group, ActivityType activityType)
     {
-        if (hours <= 0)
-            throw new DisciplineValidationException("Кількість годин має бути більшою за 0.");
-
         if (!discipline.Activities.Any(a => a.Type == activityType))
             throw new DisciplineValidationException("Ця активність не запланована у дисципліні.");
-
+    
         if (!HasTeachersAssigned(discipline, activityType))
             throw new DisciplineValidationException("На цю активність не призначено жодного викладача.");
 
-        int plannedHours = GetPlannedHours(discipline, activityType);
-        int completedHours = GetCompletedHours(discipline, activityType);
-
-        if (completedHours >= plannedHours)
+        var strategy = GetProgressStrategy(activityType);
+        if (strategy.IsFullyCompleted(discipline, group, activityType))
             throw new DisciplineValidationException("Активність вже повністю проведена.");
 
-        ValidatePrerequisites(discipline, activityType);
+        ValidatePrerequisites(discipline, group, activityType);
     }
 
-    private void ValidatePrerequisites(Discipline discipline, ActivityType activityType)
+    private void ValidateHours(int hours)
+    {
+        if (hours <= 0)
+            throw new DisciplineValidationException("Кількість годин має бути більшою за 0.");
+    }
+
+    private void ValidatePrerequisites(Discipline discipline, Group group, ActivityType activityType)
     {
         if (activityType == ActivityType.ModuleTest || activityType == ActivityType.Exam)
         {
             if (GetPlannedHours(discipline, ActivityType.Lab) > 0 &&
-                GetCompletedHours(discipline, ActivityType.Lab) < GetPlannedHours(discipline, ActivityType.Lab))
+                !GetProgressStrategy(ActivityType.Lab).IsFullyCompleted(discipline, group, ActivityType.Lab))
                 throw new DisciplineValidationException(
                     "Без проведених лабораторних робіт група не допускається до МКР/екзамену.");
 
             if (GetPlannedHours(discipline, ActivityType.CourseWork) > 0 &&
-                GetCompletedHours(discipline, ActivityType.CourseWork) < GetPlannedHours(discipline, ActivityType.CourseWork))
+                !GetProgressStrategy(ActivityType.CourseWork).IsFullyCompleted(discipline, group, ActivityType.CourseWork))
                 throw new DisciplineValidationException(
                     "Без зданої курсової роботи група не допускається до МКР/екзамену.");
         }
     }
 
-    private void UpdateCompletedHours(Discipline discipline, ActivityType activityType, int hours)
-    {
-        int planned = GetPlannedHours(discipline, activityType);
-        int current = GetCompletedHours(discipline, activityType);
-        discipline.CompletedHours[activityType] = Math.Min(current + hours, planned);
-    }
-
-    private void CheckAndAwardCredit(Discipline discipline)
+    private void CheckAndAwardCredit(Discipline discipline, Group group)
     {
         if (discipline.Type != DisciplineType.BasicsProgramming || discipline.IsCreditAwarded)
             return;
-
+    
         var plannedTypes = discipline.Activities.Select(a => a.Type).ToHashSet();
         if (!plannedTypes.Contains(ActivityType.Credit))
             return;
-
+    
         bool allCompleted = plannedTypes
             .Where(t => t != ActivityType.Credit)
-            .All(t => GetCompletedHours(discipline, t) >= GetPlannedHours(discipline, t));
-
+            .All(t => GetProgressStrategy(t).IsFullyCompleted(discipline, group, t));
+    
         if (allCompleted)
         {
             int creditHours = GetPlannedHours(discipline, ActivityType.Credit);
@@ -150,19 +161,18 @@ public class DisciplineService : IDisciplineService
     private bool HasTeachersAssigned(Discipline discipline, ActivityType activityType)
     {
         return discipline.ActivityTeachers.TryGetValue(activityType, out var teachers) && teachers.Count > 0;
-
+    
     }
 
     private int GetPlannedHours(Discipline discipline, ActivityType type)
     {
         return discipline.Activities.Where(a => a.Type == type).Sum(a => a.Hours);
-
+    
     }
 
-    private int GetCompletedHours(Discipline discipline, ActivityType type)
+    private IActivityProgressStrategy GetProgressStrategy(ActivityType activityType)
     {
-        return discipline.CompletedHours.TryGetValue(type, out var hours) ? hours : 0;
-
+        return _progressStrategies.First(s => s.CanHandle(activityType));
     }
 
     public void AssignTeacherToActivity(Guid disciplineId, ActivityType activityType, Guid teacherId)

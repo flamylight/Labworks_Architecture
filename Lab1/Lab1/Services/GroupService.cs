@@ -1,7 +1,6 @@
 using Lab1.Exceptions;
-using Lab1.Services;
 
-namespace Lab1;
+namespace Lab1.Services;
 
 public class GroupService : IGroupService
 {
@@ -70,7 +69,7 @@ public class GroupService : IGroupService
 
         if (group.Students.Count < 20 )
         {
-            throw new NotEnoughStudentsException();
+            throw new NotEnoughStudentsException(group.Students.Count);
         }
 
         var subgroup1 = new SubGroup

@@ -22,10 +22,9 @@ public class TeacherMenu
                               "2. Призначити викладача на активність дисципліни\n" +
                               "0. Вийти");
 
-            Console.Write("Твій вибір: ");
-            var input = _helper.ReadPositiveInt("Твій вибір:");
+            int parseChoice = _helper.ReadInt("Твій вибір: ");
 
-            switch (input)
+            switch (parseChoice)
             {
                 case 1:
                     CreateTeacher();
@@ -124,12 +123,7 @@ public class TeacherMenu
                 Console.WriteLine($"{i + 1}. {types[i]}");
             }
 
-            Console.Write("Вибір: ");
-            if (!int.TryParse(Console.ReadLine(), out int number))
-            {
-                Console.WriteLine("Введіть номер зі списку!");
-                continue;
-            }
+            int number = _helper.ReadInt("Вибір: ");
 
             if (number < 1 || number > types.Count)
             {
