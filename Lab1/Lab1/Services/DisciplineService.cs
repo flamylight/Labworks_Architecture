@@ -1,4 +1,5 @@
 using Lab1.Enums;
+using Lab1.Events;
 using Lab1.Exceptions;
 using Lab1.Interfaces;
 using Lab1.Services.Strategies;
@@ -14,6 +15,8 @@ public class DisciplineService : IDisciplineService
         new LabActivityProgressStrategy(),
         new RegularActivityProgressStrategy()
     };
+
+    public event EventHandler<ProgressUpdatedEventArgs>? ProgressUpdated;
 
     public DisciplineService(IUniversityData universityData)
     {
@@ -54,12 +57,7 @@ public class DisciplineService : IDisciplineService
         {
             throw new DisciplineValidationException("Така дисципліна вже створена для цієї групи.");
         }
-
-        if (type != DisciplineType.BasicsProgramming && activities.Any(a => a.Type == ActivityType.Credit))
-        {
-            throw new DisciplineValidationException("Залік можливий лише для дисципліни 'Основи програмування'.");
-        }
-
+        
         var totalHours = activities.Sum(a => a.Hours);
         if (totalHours < MinimumHours)
         {
@@ -95,7 +93,7 @@ public class DisciplineService : IDisciplineService
 
         var strategy = GetProgressStrategy(activityType);
         strategy.AddHours(discipline, group, activityType, hours, subGroupId);
-        CheckAndAwardCredit(discipline, group);
+        OnProgressUpdated(discipline, group, activityType, hours, subGroupId);
     }
 
     private void ValidateActivityConduction(Discipline discipline, Group group, ActivityType activityType)
@@ -135,27 +133,9 @@ public class DisciplineService : IDisciplineService
         }
     }
 
-    private void CheckAndAwardCredit(Discipline discipline, Group group)
+    private void OnProgressUpdated(Discipline discipline, Group group, ActivityType activityType, int addedHours, Guid? subGroupId)
     {
-        if (discipline.Type != DisciplineType.BasicsProgramming || discipline.IsCreditAwarded)
-            return;
-    
-        var plannedTypes = discipline.Activities.Select(a => a.Type).ToHashSet();
-        if (!plannedTypes.Contains(ActivityType.Credit))
-            return;
-    
-        bool allCompleted = plannedTypes
-            .Where(t => t != ActivityType.Credit)
-            .All(t => GetProgressStrategy(t).IsFullyCompleted(discipline, group, t));
-    
-        if (allCompleted)
-        {
-            int creditHours = GetPlannedHours(discipline, ActivityType.Credit);
-            if (creditHours > 0)
-                discipline.CompletedHours[ActivityType.Credit] = creditHours;
-            
-            discipline.IsCreditAwarded = true;
-        }
+        ProgressUpdated?.Invoke(this, new ProgressUpdatedEventArgs(discipline, group, activityType, addedHours, subGroupId));
     }
 
     private bool HasTeachersAssigned(Discipline discipline, ActivityType activityType)
@@ -173,6 +153,12 @@ public class DisciplineService : IDisciplineService
     private IActivityProgressStrategy GetProgressStrategy(ActivityType activityType)
     {
         return _progressStrategies.First(s => s.CanHandle(activityType));
+    }
+    
+    public bool IsActivityFullyCompleted(Discipline discipline, Group group, ActivityType activityType)
+    {
+        var strategy = GetProgressStrategy(activityType);
+        return strategy.IsFullyCompleted(discipline, group, activityType);
     }
 
     public void AssignTeacherToActivity(Guid disciplineId, ActivityType activityType, Guid teacherId)

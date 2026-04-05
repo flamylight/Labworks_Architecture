@@ -1,5 +1,6 @@
 ﻿using Lab1.Interfaces;
 using Lab1.Menus;
+using Lab1.Observers;
 using Lab1.Services;
 
 namespace Lab1;
@@ -14,6 +15,10 @@ class Program
         IGroupService groupService = new GroupService(universityData);
         IDisciplineService disciplineService = new DisciplineService(universityData);
         ITeacherService teacherService = new TeacherService(universityData);
+
+        var concreteDisciplineService = (DisciplineService)disciplineService;
+        var creditObserver = new CreditAwardObserver();
+        creditObserver.Subscribe(concreteDisciplineService);
 
         UniversitySimulation simulation = new UniversitySimulation(studentService, groupService, disciplineService, teacherService);
 

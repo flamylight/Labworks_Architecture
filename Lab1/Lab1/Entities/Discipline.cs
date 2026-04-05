@@ -32,4 +32,12 @@ public class Discipline
         Type = type;
         GroupId = groupId;
     }
+
+    public void SetCredit(int creditHours)
+    {
+        if (creditHours > 0)
+            CompletedHours[ActivityType.Credit] = creditHours;
+
+        IsCreditAwarded = true;
+    }
 }

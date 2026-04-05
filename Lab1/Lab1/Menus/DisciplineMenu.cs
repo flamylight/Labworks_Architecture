@@ -125,7 +125,7 @@ public class DisciplineMenu
         {
             var d = disciplines[i];
             Console.WriteLine($"{i + 1}. {d.Name} — заплановано {d.TotalHours} год."
-                              + (d.Type == DisciplineType.BasicsProgramming && d.IsCreditAwarded ? " (Залік: автоматично виставлено)" : ""));
+                              + (d.IsCreditAwarded ? " (Залік: автоматично виставлено)" : ""));
 
             var activityTypes = new Dictionary<ActivityType, int>();
             foreach (var activity in d.Activities)
