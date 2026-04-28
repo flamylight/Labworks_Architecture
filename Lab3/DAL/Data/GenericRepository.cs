@@ -9,4 +9,9 @@ public class GenericRepository<T>(AppDbContext dbContext)
     {
         dbContext.Set<T>().Add(entity);
     }
+
+    public IEnumerable<T> GetAll()
+    {
+        return dbContext.Set<T>().ToList();
+    }
 }

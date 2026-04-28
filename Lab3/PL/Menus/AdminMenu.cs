@@ -12,14 +12,18 @@ public class AdminMenu(IServiceManager serviceManager)
             Console.Clear();
             Console.WriteLine("-----Меню адміністратора-----");
             Console.WriteLine("1. Додати нову послугу\n" +
+                              "2. Переглянути послуги\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 1);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 2);
 
             switch (choice)
             {
                 case 1:
                     CreateNewService();
+                    break;
+                case 2:
+                    ViewServices();
                     break;
                 case 0:
                     return;
@@ -50,5 +54,29 @@ public class AdminMenu(IServiceManager serviceManager)
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private void ViewServices()
+    {
+        var services = serviceManager.GetAllServices().ToList();
+
+        if (!services.Any())
+        {
+            Console.WriteLine("Список порожній!");
+        }
+
+        foreach (var s in services)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"# {s.Title} ({s.Price:F2} грн)");
+            Console.ResetColor();
+        
+            if (!string.IsNullOrEmpty(s.Description))
+            {
+                Console.WriteLine($"  Опис: {s.Description}");
+            }
+            Console.WriteLine(new string('.', 40));
+        }
+        MenuHelper.PressAnyKey();
     }
 }

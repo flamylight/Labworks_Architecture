@@ -1,7 +1,7 @@
 using BLL.DTOs;
 using BLL.Interfaces;
+using BLL.Mappers;
 using DAL.Interfaces;
-using DAL.Models;
 
 namespace BLL.Managers;
 
@@ -10,24 +10,20 @@ public class ServiceManager(IUnitOfWork uow) : IServiceManager
     public GetServiceDto CreateService(CreateServiceDto dto)
     {
         ValidateNewService(dto);
-        
-        var serviceEntity = new Service
-        {
-            Title = dto.Title,
-            Description = dto.Description,
-            Price = dto.Price
-        };
+
+        var serviceEntity = dto.ToEntity();
         
         uow.Services.Add(serviceEntity);
         uow.Save();
 
-        return new GetServiceDto
-        {
-            Id = serviceEntity.Id,
-            Title = serviceEntity.Title,
-            Description = serviceEntity.Description,
-            Price = serviceEntity.Price
-        };
+        return serviceEntity.ToGetDto();
+    }
+
+    public IEnumerable<GetServiceDto> GetAllServices()
+    {
+        var services = uow.Services.GetAll();
+        
+        return services.Select(s => s.ToGetDto());
     }
 
     private void ValidateNewService(CreateServiceDto dto)
