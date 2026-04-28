@@ -8,6 +8,8 @@ public interface IUnitOfWork
     IGenericRepository<Order> Orders { get; }
     IGenericRepository<OrderService> OrderServices { get; }
     IGenericRepository<PortfolioItem> PortfolioItems { get; }
+    public IGenericRepository<Package> Packages { get; }
+    public IGenericRepository<PackageService> PackageServices { get; }
 
     void Save();
 }

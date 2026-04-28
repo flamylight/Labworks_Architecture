@@ -38,6 +38,35 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         return orderGetDto;
     }
     
+    public GetOrderDto CreateTurnkeyOrder(CreateOrderDto dto)
+    {
+        ValidateNewTurnkeyOrder(dto);
+        
+        var orderEntity = dto.ToEntity();
+        var package = uow.Packages.GetById(orderEntity.PackageId!.Value);
+
+        foreach (var packageService in package!.PackageServices)
+        {
+            if (packageService.Service != null)
+            {
+                orderEntity.OrderServices.Add(new OrderService
+                {
+                    ServiceId = packageService.ServiceId,
+                    OrderId = orderEntity.Id
+                });
+
+                orderEntity.TotalPrice += packageService.Service.Price;
+            }
+        }
+        
+        uow.Orders.Add(orderEntity);
+        uow.Save();
+
+        var orderGetDto = orderEntity.ToGetDto();
+        
+        return orderGetDto;
+    }
+    
     public IEnumerable<GetOrderDto> GetAllOrders()
     {
         var orders = uow.Orders.GetAll();
@@ -76,6 +105,24 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         if (dto.ServiceIds.Count == 0 || dto.ServiceIds.Count > 1)
         {
             throw new ArgumentException("Замовлення має мати 1 послугу");
+        }
+    }
+    
+    private void ValidateNewTurnkeyOrder(CreateOrderDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Title))
+        {
+            throw new ArgumentException("Назва не може бути порожньою");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.ClientDescription))
+        {
+            throw new ArgumentException("Опис не може бути порожнім");
+        }
+
+        if (dto.PackageId == null)
+        {
+            throw new ArgumentException("Не вибрано пакет послуг");
         }
     }
 }

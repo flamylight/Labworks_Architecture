@@ -30,7 +30,9 @@ public static class OrderMapper
         return new Order
         {
             Title = dto.Title,
-            ClientDescription = dto.ClientDescription
+            ClientDescription = dto.ClientDescription,
+            IsTurnkey = dto.IsTurnkey,
+            PackageId = dto.PackageId
         };
     }
 }

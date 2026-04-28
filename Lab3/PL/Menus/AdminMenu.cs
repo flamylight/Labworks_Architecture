@@ -3,7 +3,9 @@ using BLL.Interfaces;
 
 namespace PL.Menus;
 
-public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManager)
+public class AdminMenu(IServiceManager serviceManager, 
+    IOrderManager orderManager,
+    IPackageManager packageManager)
 {
     public void Run()
     {
@@ -12,11 +14,13 @@ public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManage
             Console.Clear();
             Console.WriteLine("-----Меню адміністратора-----");
             Console.WriteLine("1. Додати нову послугу\n" +
-                              "2. Переглянути послуги\n" +
-                              "3. Переглянути замовлення\n" +
+                              "2. Створити пакет послуг (під ключ)\n" +
+                              "3. Переглянути послуги\n" +
+                              "4. Переглянути пакети послуг\n" +
+                              "5. Переглянути замовлення\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 3);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 5);
 
             switch (choice)
             {
@@ -24,10 +28,16 @@ public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManage
                     CreateNewService();
                     break;
                 case 2:
+                    CreateNewPackage();
+                    break;
+                case 3:
                     ViewServices();
                     MenuHelper.PressAnyKey();
                     break;
-                case 3:
+                case 4:
+                    ViewPackages();
+                    break;
+                case 5:
                     ViewOrders();
                     break;
                 case 0:
@@ -59,6 +69,109 @@ public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManage
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private void CreateNewPackage()
+    {
+        var services = serviceManager.GetAllServices().ToList();
+
+        if (!services.Any())
+        {
+            Console.WriteLine("Послуг поки немає");
+        }
+        else
+        {
+            var title = MenuHelper.ReadRequiredString("Назва: ");
+            var description = MenuHelper.ReadRequiredString("Опис: ");
+
+            ViewServices();
+
+            var selectedServices = SelectServices(services);
+
+            try
+            {
+                packageManager.CreatePackage(new CreatePackageDto
+                {
+                    Title = title,
+                    Description = description,
+                    Services = selectedServices.Select(s => s.Id).ToList()
+                });
+                Console.WriteLine("Успішно створено!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            MenuHelper.PressAnyKey();
+        }
+    }
+
+    private void ViewPackages()
+    {
+        var packages = packageManager.GetAllPackages().ToList();
+
+        if (!packages.Any())
+        {
+            Console.WriteLine("Доступних пакетів «Під ключ» поки немає.");
+        }
+        else
+        {
+            Console.WriteLine("\n=== ДОСТУПНІ ПАКЕТИ «ПІД КЛЮЧ» ===");
+
+            for (int i = 0; i < packages.Count; i++)
+            {
+                var p = packages[i];
+        
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"{i + 1} # ПАКЕТ: {p.Title.ToUpper()}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"  ЦІНА: {p.TotalPrice:F2} грн");
+                Console.ResetColor();
+
+                if (!string.IsNullOrEmpty(p.Description))
+                {
+                    Console.WriteLine($"  Про пакет: {p.Description}");
+                }
+                
+                Console.WriteLine("  Склад пакету:");
+                foreach (var ps in p.PackageServicesItemDto)
+                {
+                    Console.WriteLine($"    - {ps.Title} ({ps.Price:F2} грн)"); 
+                }
+
+                Console.WriteLine(new string('-', 45));
+            }
+        }
+        MenuHelper.PressAnyKey();
+    }
+
+    private List<GetServiceDto> SelectServices(List<GetServiceDto> services)
+    {
+        List<GetServiceDto> selectedServices = new();
+        bool isDone = false;
+        
+        while (!isDone)
+        {
+            var serviceNumber = MenuHelper.ReadChoiceNumber(
+                "Виберіть сервіс: ", 1, services.Count);
+            selectedServices.Add(services[serviceNumber - 1]);
+                
+            Console.WriteLine("Вибрати ще?\n" +
+                              "1. Так\n" +
+                              "2. Ні");
+
+            var choice = MenuHelper.ReadChoiceNumber("Вибір: ", 1, 2);
+
+            switch (choice)
+            {
+                case 1:
+                    continue;
+                case 2:
+                    isDone = true;
+                    break;
+            }
+        }
+        return selectedServices;
     }
 
     private void ViewServices()

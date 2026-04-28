@@ -10,5 +10,7 @@ public class Order
     public bool IsDone { get; set; }
     public string ClientDescription { get; set; }  = String.Empty;
     public bool IsTurnkey { get; set; }
+    public Guid? PackageId { get; set; }  
+    public Package? Package { get; set; }
     public List<OrderService> OrderServices { get; set; } = new();
 }
