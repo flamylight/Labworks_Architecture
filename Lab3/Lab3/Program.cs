@@ -1,1 +1,38 @@
-﻿Console.WriteLine("Hello");
+﻿using BLL.Interfaces;
+using BLL.Managers;
+using DAL.Data;
+using PL;
+using PL.Menus;
+
+namespace Lab3;
+
+class Program
+{
+    static void Main()
+    {
+        var appDbContext = new AppDbContext();
+        var unitOfWork = new UnitOfWork(appDbContext);
+        IServiceManager serviceManager = new ServiceManager(unitOfWork);
+        AdminMenu adminMenu = new AdminMenu(serviceManager);
+
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("-----РЕЖИМ ВХОДУ-----");
+            Console.WriteLine("1. Адміністартор\n" +
+                              "2. Клієнт\n" +
+                              "0. Вийти");
+        
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ",0, 2);
+
+            switch (choice)
+            {
+                case 1:
+                    adminMenu.Run();
+                    break;
+                case 0:
+                    return;
+            }
+        }
+    }
+}
