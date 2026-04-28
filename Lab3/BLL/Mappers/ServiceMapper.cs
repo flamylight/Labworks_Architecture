@@ -16,16 +16,6 @@ public static class ServiceMapper
         };
     }
 
-    public static CreateServiceDto ToCreateDto(this Service entity)
-    {
-        return new CreateServiceDto
-        {
-            Title = entity.Title,
-            Description = entity.Description,
-            Price = entity.Price
-        };
-    }
-
     public static Service ToEntity(this CreateServiceDto dto)
     {
         return new Service

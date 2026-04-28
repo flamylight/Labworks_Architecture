@@ -14,4 +14,9 @@ public class GenericRepository<T>(AppDbContext dbContext)
     {
         return dbContext.Set<T>().ToList();
     }
+
+    public T? GetById(Guid id)
+    {
+        return dbContext.Set<T>().Find(id);
+    }
 }

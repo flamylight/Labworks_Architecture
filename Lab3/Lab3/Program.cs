@@ -13,7 +13,9 @@ class Program
         var appDbContext = new AppDbContext();
         var unitOfWork = new UnitOfWork(appDbContext);
         IServiceManager serviceManager = new ServiceManager(unitOfWork);
+        IOrderManager orderManager = new OrderManager(unitOfWork);
         AdminMenu adminMenu = new AdminMenu(serviceManager);
+        CustomerMenu customerMenu = new CustomerMenu(serviceManager, orderManager);
 
         while (true)
         {
@@ -29,6 +31,9 @@ class Program
             {
                 case 1:
                     adminMenu.Run();
+                    break;
+                case 2:
+                    customerMenu.Run();
                     break;
                 case 0:
                     return;

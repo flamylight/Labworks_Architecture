@@ -24,6 +24,7 @@ public class AdminMenu(IServiceManager serviceManager)
                     break;
                 case 2:
                     ViewServices();
+                    MenuHelper.PressAnyKey();
                     break;
                 case 0:
                     return;
@@ -65,10 +66,11 @@ public class AdminMenu(IServiceManager serviceManager)
             Console.WriteLine("Список порожній!");
         }
 
-        foreach (var s in services)
+        for (int i = 0; i < services.Count; i++)
         {
+            var s = services[i];
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"# {s.Title} ({s.Price:F2} грн)");
+            Console.WriteLine($"{i+1} # {s.Title} ({s.Price:F2} грн)");
             Console.ResetColor();
         
             if (!string.IsNullOrEmpty(s.Description))
@@ -77,6 +79,5 @@ public class AdminMenu(IServiceManager serviceManager)
             }
             Console.WriteLine(new string('.', 40));
         }
-        MenuHelper.PressAnyKey();
     }
 }
