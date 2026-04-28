@@ -1,3 +1,5 @@
+using BLL.DTOs;
+
 namespace PL;
 
 public class MenuHelper
@@ -54,6 +56,42 @@ public class MenuHelper
 
             return value;
         }
+    }
+    
+    public static void PrintOrderDetails(GetOrderDto order)
+    {
+        Console.WriteLine(new string('=', 50));
+        Console.WriteLine($"ЗАМОВЛЕННЯ: {order.Title.ToUpper()}");
+        Console.WriteLine(new string('-', 50));
+    
+        Console.WriteLine($"Створено:    {order.CreatedAt:dd.MM.yyyy HH:mm}");
+        Console.WriteLine($"Статус:      {(order.IsDone ? "Виконано" : "В процесі")}");
+    
+        if (order.FinishedAt.HasValue)
+            Console.WriteLine($"Завершено:   {order.FinishedAt.Value:dd.MM.yyyy HH:mm}");
+        
+        Console.WriteLine($"Тип:         {(order.IsTurnkey ? "Під ключ" : "Окрема послуга")}");
+        Console.WriteLine($"Опис:        {order.ClientDescription}");
+    
+        Console.WriteLine(new string('-', 50));
+        Console.WriteLine("ПОСЛУГИ:");
+    
+        if (order.OrderServices.Any())
+        {
+            foreach (var item in order.OrderServices)
+            {
+                Console.WriteLine($"  • {item.Title,-30} | {item.Price,8:C2}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("  (список послуг порожній)");
+        }
+
+        Console.WriteLine(new string('-', 50));
+        Console.WriteLine($"ЗАГАЛЬНА ВАРТІСТЬ: {order.TotalPrice,28:C2}");
+        Console.WriteLine(new string('=', 50));
+        Console.WriteLine();
     }
     
     public static void PressAnyKey()

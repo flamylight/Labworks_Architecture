@@ -14,7 +14,7 @@ class Program
         var unitOfWork = new UnitOfWork(appDbContext);
         IServiceManager serviceManager = new ServiceManager(unitOfWork);
         IOrderManager orderManager = new OrderManager(unitOfWork);
-        AdminMenu adminMenu = new AdminMenu(serviceManager);
+        AdminMenu adminMenu = new AdminMenu(serviceManager, orderManager);
         CustomerMenu customerMenu = new CustomerMenu(serviceManager, orderManager);
 
         while (true)

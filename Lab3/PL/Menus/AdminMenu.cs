@@ -3,7 +3,7 @@ using BLL.Interfaces;
 
 namespace PL.Menus;
 
-public class AdminMenu(IServiceManager serviceManager)
+public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManager)
 {
     public void Run()
     {
@@ -13,9 +13,10 @@ public class AdminMenu(IServiceManager serviceManager)
             Console.WriteLine("-----Меню адміністратора-----");
             Console.WriteLine("1. Додати нову послугу\n" +
                               "2. Переглянути послуги\n" +
+                              "3. Переглянути замовлення\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 2);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 3);
 
             switch (choice)
             {
@@ -25,6 +26,9 @@ public class AdminMenu(IServiceManager serviceManager)
                 case 2:
                     ViewServices();
                     MenuHelper.PressAnyKey();
+                    break;
+                case 3:
+                    ViewOrders();
                     break;
                 case 0:
                     return;
@@ -79,5 +83,26 @@ public class AdminMenu(IServiceManager serviceManager)
             }
             Console.WriteLine(new string('.', 40));
         }
+    }
+
+    private void ViewOrders()
+    {
+        var orders = orderManager.GetAllOrders().ToList();
+
+        if (!orders.Any())
+        {
+            Console.WriteLine("Список порожній!");
+        }
+        else
+        {
+            for (int i = 0; i < orders.Count; i++)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"[{i+1}] ");
+                Console.ResetColor();
+                MenuHelper.PrintOrderDetails(orders[i]);
+            }
+        }
+        MenuHelper.PressAnyKey();
     }
 }

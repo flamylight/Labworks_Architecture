@@ -4,5 +4,6 @@ namespace BLL.Interfaces;
 
 public interface IOrderManager
 {
-    GetOrderDto CreateOrder(CreateOrderDto dto);
+    GetOrderDto CreateServiceOrder(CreateOrderDto dto);
+    IEnumerable<GetOrderDto> GetAllOrders();
 }

@@ -5,17 +5,17 @@ namespace DAL.Data;
 public class GenericRepository<T>(AppDbContext dbContext) 
     : IGenericRepository<T> where T : class
 {
-    public void Add(T entity)
+    public virtual void Add(T entity)
     {
         dbContext.Set<T>().Add(entity);
     }
 
-    public IEnumerable<T> GetAll()
+    public virtual IEnumerable<T> GetAll()
     {
         return dbContext.Set<T>().ToList();
     }
 
-    public T? GetById(Guid id)
+    public virtual T? GetById(Guid id)
     {
         return dbContext.Set<T>().Find(id);
     }

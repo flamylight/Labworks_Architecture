@@ -16,7 +16,7 @@ public class UnitOfWork: IUnitOfWork
     {
         _dbContext = dbContext;
         
-        Orders = new GenericRepository<Order>(dbContext);
+        Orders = new OrderRepository(dbContext);
         Services = new GenericRepository<Service>(dbContext);
         OrderServices = new GenericRepository<OrderService>(dbContext);
         PortfolioItems = new GenericRepository<PortfolioItem>(dbContext);

@@ -12,13 +12,15 @@ public static class OrderMapper
             Id = entity.Id,
             Title = entity.Title,
             CreatedAt = entity.CreatedAt,
+            TotalPrice = entity.TotalPrice,
             IsTurnkey = entity.IsTurnkey,
             IsDone = entity.IsDone,
             ClientDescription = entity.ClientDescription,
             FinishedAt = entity.FinishedAt,
             OrderServices = entity.OrderServices.Select(os => new OrderServiceItemDto
             {
-                Title = os.Service?.Title ?? "Послуга видалена"
+                Title = os.Service?.Title ?? "Послуга видалена",
+                Price = os.Service?.Price ?? 0
             }).ToList()
         };
     }

@@ -14,9 +14,10 @@ public class CustomerMenu(IServiceManager serviceManager,
             Console.WriteLine("-----Меню клієнта-----");
             Console.WriteLine("1. Переглянути послуги\n" +
                               "2. Зробити замовлення послуги\n" +
+                              "3. Переглянути замовлення\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 2);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 3);
 
             switch (choice)
             {
@@ -26,6 +27,9 @@ public class CustomerMenu(IServiceManager serviceManager,
                     break;
                 case 2:
                     MakeServiceOrder();
+                    break;
+                case 3:
+                    ViewOrders();
                     break;
                 case 0:
                     return;
@@ -85,9 +89,35 @@ public class CustomerMenu(IServiceManager serviceManager,
                     services[choice - 1].Id
                 }
             };
+
+            try
+            {
+                orderManager.CreateServiceOrder(orderDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             
-            orderManager.CreateOrder(orderDto);
             MenuHelper.PressAnyKey();
         }
+    }
+
+    private void ViewOrders()
+    {
+        var orders = orderManager.GetAllOrders().ToList();
+
+        if (!orders.Any())
+        {
+            Console.WriteLine("Список порожній!");
+        }
+        else
+        {
+            foreach (var order in orders)
+            {
+                MenuHelper.PrintOrderDetails(order);
+            }
+        }
+        MenuHelper.PressAnyKey();
     }
 }
