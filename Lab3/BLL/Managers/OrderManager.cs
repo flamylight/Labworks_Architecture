@@ -45,6 +45,22 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         return orders.Select(o => o.ToGetDto());
     }
 
+    public void MarkAsDone(Guid orderId)
+    {
+        var order = uow.Orders.GetById(orderId);
+
+        if (order == null)
+        {
+            throw new Exception("Замовлення не знайдено");
+        }
+        
+        order.IsDone = true;
+        order.FinishedAt = DateTime.UtcNow;
+        
+        uow.Orders.Update(order);
+        uow.Save();
+    }
+    
     private void ValidateNewServiceOrder(CreateOrderDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))

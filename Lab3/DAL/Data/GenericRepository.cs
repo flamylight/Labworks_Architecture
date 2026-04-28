@@ -19,4 +19,9 @@ public class GenericRepository<T>(AppDbContext dbContext)
     {
         return dbContext.Set<T>().Find(id);
     }
+
+    public virtual void Update(T entity)
+    {
+        dbContext.Set<T>().Update(entity);
+    }
 }

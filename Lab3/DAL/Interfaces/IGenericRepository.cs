@@ -8,4 +8,5 @@ public interface IGenericRepository<T> where T: class
     IEnumerable<T> GetAll();
 
     public T? GetById(Guid id);
+    void Update(T entity);
 }

@@ -103,6 +103,41 @@ public class AdminMenu(IServiceManager serviceManager, IOrderManager orderManage
                 MenuHelper.PrintOrderDetails(orders[i]);
             }
         }
-        MenuHelper.PressAnyKey();
+        CompleteOrder(orders);
+    }
+
+    private void CompleteOrder(List<GetOrderDto> orders)
+    {
+        Console.WriteLine("1. Виконати замовлення\n" +
+                          "0. Вийти");
+
+        var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 1);
+
+        switch (choice)
+        {
+            case 0:
+                return;
+            case 1:
+                var orderNumber = MenuHelper.ReadChoiceNumber(
+                    "Номер замовлення: ", 1, orders.Count);
+                if (orders[orderNumber - 1].IsDone)
+                {
+                    Console.WriteLine("Замовлення вже виконано");
+                }
+                else
+                {
+                    try
+                    {
+                        orderManager.MarkAsDone(orders[orderNumber - 1].Id);
+                        Console.WriteLine("Виконано!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                MenuHelper.PressAnyKey();
+                break;
+        }
     }
 }
