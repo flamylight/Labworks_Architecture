@@ -18,9 +18,10 @@ public class AdminMenu(IServiceManager serviceManager,
                               "3. Переглянути послуги\n" +
                               "4. Переглянути пакети послуг\n" +
                               "5. Переглянути замовлення\n" +
+                              "6. Портфоліо\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 5);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 6);
 
             switch (choice)
             {
@@ -39,6 +40,9 @@ public class AdminMenu(IServiceManager serviceManager,
                     break;
                 case 5:
                     ViewOrders();
+                    break;
+                case 6:
+                    ViewPortfolio();
                     break;
                 case 0:
                     return;
@@ -143,6 +147,66 @@ public class AdminMenu(IServiceManager serviceManager,
             }
         }
         MenuHelper.PressAnyKey();
+    }
+
+    private void ViewPortfolio()
+    {
+        var portfolioItems = orderManager.GetPortfolioOrders().ToList();
+
+        if (!portfolioItems.Any())
+        {
+            Console.WriteLine("Портфоліо порожнє");
+        }
+        else
+        {
+            for (int i = 0; i < portfolioItems.Count; i++)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"[{i+1}] ");
+                Console.ResetColor();
+                
+                MenuHelper.PrintOrderDetails(portfolioItems[i]);
+            }
+        }
+        
+        AddToPortfolio();
+    }
+
+    private void AddToPortfolio()
+    {
+        Console.WriteLine("Добавити роботу у портфоліо?");
+        Console.WriteLine("1. Так\n" +
+                          "2. Ні");
+
+        var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 1, 2);
+
+        switch (choice)
+        {
+            case 1:
+                var doneOrders = orderManager.GetDoneOrders().ToList();
+
+                if (!doneOrders.Any())
+                {
+                    Console.WriteLine("Поки немає виконаних робіт");
+                }
+                else
+                {
+                    foreach (var order in doneOrders)
+                    {
+                        MenuHelper.PrintOrderDetails(order);
+                    }
+                
+                    var choiceOrder = MenuHelper.ReadChoiceNumber(
+                        "Виберіть замовлення: ", 1, doneOrders.Count);
+                    
+                    orderManager.MarkAsPortfolio(doneOrders[choiceOrder - 1].Id);
+                    Console.WriteLine("Успішно додано!");
+                }
+                MenuHelper.PressAnyKey();
+                break;
+            case 2:
+                return;
+        }
     }
 
     private List<GetServiceDto> SelectServices(List<GetServiceDto> services)

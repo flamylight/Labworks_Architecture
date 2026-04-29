@@ -5,11 +5,10 @@ namespace DAL.Interfaces;
 public interface IUnitOfWork
 {
     IGenericRepository<Service> Services { get; }
-    IGenericRepository<Order> Orders { get; }
+    IOrderRepository Orders { get; }
     IGenericRepository<OrderService> OrderServices { get; }
-    IGenericRepository<PortfolioItem> PortfolioItems { get; }
-    public IGenericRepository<Package> Packages { get; }
-    public IGenericRepository<PackageService> PackageServices { get; }
+    IGenericRepository<Package> Packages { get; }
+    IGenericRepository<PackageService> PackageServices { get; }
 
     void Save();
 }

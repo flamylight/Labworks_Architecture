@@ -18,9 +18,10 @@ public class CustomerMenu(IServiceManager serviceManager,
                               "3. Переглянути пакети послуг (під ключ)\n" +
                               "4. Зробити замовлення пакету послуг\n" +
                               "5. Переглянути замовлення\n" +
+                              "6. Портфоліо\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 5);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 6);
 
             switch (choice)
             {
@@ -40,6 +41,9 @@ public class CustomerMenu(IServiceManager serviceManager,
                     break;
                 case 5:
                     ViewOrders();
+                    break;
+                case 6:
+                    ViewPortfolio();
                     break;
                 case 0:
                     return;
@@ -205,5 +209,33 @@ public class CustomerMenu(IServiceManager serviceManager,
             }
         }
         return packages;
+    }
+
+    private void ViewPortfolio()
+    {
+        var portfolioItems = orderManager.GetPortfolioOrders().ToList();
+
+        if (!portfolioItems.Any())
+        {
+            Console.WriteLine("Портфоліо порожнє");
+        }
+        else
+        {
+            foreach (var item in portfolioItems)
+            {
+                MenuHelper.PrintOrderDetails(item);
+            }
+
+            for (int i = 0; i < portfolioItems.Count; i++)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"[{i+1}] ");
+                Console.ResetColor();
+                
+                MenuHelper.PrintOrderDetails(portfolioItems[i]);
+            }
+        }
+        
+        MenuHelper.PressAnyKey();
     }
 }

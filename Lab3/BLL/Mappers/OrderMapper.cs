@@ -15,6 +15,7 @@ public static class OrderMapper
             TotalPrice = entity.TotalPrice,
             IsTurnkey = entity.IsTurnkey,
             IsDone = entity.IsDone,
+            IsInPortfolio = entity.IsInPortfolio,
             ClientDescription = entity.ClientDescription,
             FinishedAt = entity.FinishedAt,
             OrderServices = entity.OrderServices.Select(os => new OrderServiceItemDto

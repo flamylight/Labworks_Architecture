@@ -8,6 +8,7 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? FinishedAt { get; set; }
     public bool IsDone { get; set; }
+    public bool IsInPortfolio { get; set; }
     public string ClientDescription { get; set; }  = String.Empty;
     public bool IsTurnkey { get; set; }
     public Guid? PackageId { get; set; }  

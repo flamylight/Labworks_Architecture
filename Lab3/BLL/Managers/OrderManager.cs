@@ -89,6 +89,31 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         uow.Orders.Update(order);
         uow.Save();
     }
+
+    public IEnumerable<GetOrderDto> GetPortfolioOrders()
+    {
+        var orders = uow.Orders.GetPortfolioOrders();
+        return orders.Select(o => o.ToGetDto());
+    }
+
+    public IEnumerable<GetOrderDto> GetDoneOrders()
+    {
+        var orders = uow.Orders.GetDoneOrders();
+        return orders.Select(o => o.ToGetDto());   
+    }
+
+    public void MarkAsPortfolio(Guid orderId)
+    {
+        var order = uow.Orders.GetById(orderId);
+
+        if (order == null)
+        {
+            throw new ArgumentException("Такого замовлення не знайдено");
+        }
+        order.IsInPortfolio = true;
+        uow.Orders.Update(order);
+        uow.Save();
+    }
     
     private void ValidateNewServiceOrder(CreateOrderDto dto)
     {

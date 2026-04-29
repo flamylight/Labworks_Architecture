@@ -8,9 +8,8 @@ public class UnitOfWork: IUnitOfWork
     private readonly AppDbContext _dbContext;
     
     public IGenericRepository<Service> Services { get; }
-    public IGenericRepository<Order> Orders { get; }
+    public IOrderRepository Orders { get; }
     public IGenericRepository<OrderService> OrderServices { get; }
-    public IGenericRepository<PortfolioItem> PortfolioItems { get; }
     public IGenericRepository<Package> Packages { get; }
     public IGenericRepository<PackageService> PackageServices { get; }
 
@@ -21,7 +20,6 @@ public class UnitOfWork: IUnitOfWork
         Orders = new OrderRepository(dbContext);
         Services = new GenericRepository<Service>(dbContext);
         OrderServices = new GenericRepository<OrderService>(dbContext);
-        PortfolioItems = new GenericRepository<PortfolioItem>(dbContext);
         Packages = new PackageRepository(dbContext);
         PackageServices = new GenericRepository<PackageService>(dbContext);
     }
