@@ -221,11 +221,6 @@ public class CustomerMenu(IServiceManager serviceManager,
         }
         else
         {
-            foreach (var item in portfolioItems)
-            {
-                MenuHelper.PrintOrderDetails(item);
-            }
-
             for (int i = 0; i < portfolioItems.Count; i++)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;

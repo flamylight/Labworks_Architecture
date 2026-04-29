@@ -25,15 +25,4 @@ public static class ServiceMapper
             Price = dto.Price
         };
     }
-
-    public static Service ToEntity(this GetServiceDto dto)
-    {
-        return new Service
-        {
-            Id = dto.Id,
-            Title = dto.Title,
-            Description = dto.Description,
-            Price = dto.Price
-        };
-    }
 }

@@ -60,38 +60,88 @@ public class MenuHelper
     
     public static void PrintOrderDetails(GetOrderDto order)
     {
-        Console.WriteLine(new string('=', 50));
-        Console.WriteLine($"ЗАМОВЛЕННЯ: {order.Title.ToUpper()}");
-        Console.WriteLine(new string('-', 50));
-    
-        Console.WriteLine($"Створено:    {order.CreatedAt:dd.MM.yyyy HH:mm}");
-        Console.WriteLine($"Статус:      {(order.IsDone ? "Виконано" : "В процесі")}");
-    
+        var originalColor = Console.ForegroundColor;
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('=', 60));
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($" ЗАМОВЛЕННЯ: {order.Title.ToUpper()}");
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('-', 60));
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(" Створено:   ");
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine($"{order.CreatedAt:dd.MM.yyyy HH:mm}");
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(" Статус:     ");
+        Console.ForegroundColor = order.IsDone ? ConsoleColor.Green : ConsoleColor.Yellow;
+        Console.WriteLine(order.IsDone ? "Виконано" : "В процесі");
+
         if (order.FinishedAt.HasValue)
-            Console.WriteLine($"Завершено:   {order.FinishedAt.Value:dd.MM.yyyy HH:mm}");
-        
-        Console.WriteLine($"Тип:         {(order.IsTurnkey ? "Під ключ" : "Окрема послуга")}");
-        Console.WriteLine($"Опис:        {order.ClientDescription}");
-    
-        Console.WriteLine(new string('-', 50));
-        Console.WriteLine("ПОСЛУГИ:");
-    
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" Завершено:  ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"{order.FinishedAt.Value:dd.MM.yyyy HH:mm}");
+        }
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(" Тип:        ");
+        Console.ForegroundColor = order.IsTurnkey ? ConsoleColor.Magenta : ConsoleColor.Blue;
+        Console.WriteLine(order.IsTurnkey ? "Під ключ" : "Окрема послуга");
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(" Опис:       ");
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(order.ClientDescription);
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('-', 60));
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine(" ПОСЛУГИ:");
+
         if (order.OrderServices.Any())
         {
             foreach (var item in order.OrderServices)
             {
-                Console.WriteLine($"  • {item.Title,-30} | {item.Price,8:C2}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("  * ");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{item.Title,-32}");
+
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write(" | ");
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"{item.Price,10:C2}");
             }
         }
         else
         {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("  (список послуг порожній)");
         }
 
-        Console.WriteLine(new string('-', 50));
-        Console.WriteLine($"ЗАГАЛЬНА ВАРТІСТЬ: {order.TotalPrice,28:C2}");
-        Console.WriteLine(new string('=', 50));
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('-', 60));
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(" ЗАГАЛЬНА ВАРТІСТЬ: ");
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{order.TotalPrice,16:C2}");
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('=', 60));
         Console.WriteLine();
+
+        Console.ForegroundColor = originalColor;
     }
     
     public static void PressAnyKey()

@@ -67,12 +67,12 @@ public class AdminMenu(IServiceManager serviceManager,
         {
             serviceManager.CreateService(dto);
             Console.WriteLine("Успішно створено!");
-            MenuHelper.PressAnyKey();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
+        MenuHelper.PressAnyKey();
     }
 
     private void CreateNewPackage()
@@ -198,9 +198,16 @@ public class AdminMenu(IServiceManager serviceManager,
                 
                     var choiceOrder = MenuHelper.ReadChoiceNumber(
                         "Виберіть замовлення: ", 1, doneOrders.Count);
-                    
-                    orderManager.MarkAsPortfolio(doneOrders[choiceOrder - 1].Id);
-                    Console.WriteLine("Успішно додано!");
+
+                    try
+                    {
+                        orderManager.MarkAsPortfolio(doneOrders[choiceOrder - 1].Id);
+                        Console.WriteLine("Успішно додано!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
                 MenuHelper.PressAnyKey();
                 break;
@@ -269,16 +276,15 @@ public class AdminMenu(IServiceManager serviceManager,
         if (!orders.Any())
         {
             Console.WriteLine("Список порожній!");
+            MenuHelper.PressAnyKey();
+            return;
         }
-        else
+        for (int i = 0; i < orders.Count; i++)
         {
-            for (int i = 0; i < orders.Count; i++)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write($"[{i+1}] ");
-                Console.ResetColor();
-                MenuHelper.PrintOrderDetails(orders[i]);
-            }
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"[{i+1}] ");
+            Console.ResetColor();
+            MenuHelper.PrintOrderDetails(orders[i]);
         }
         CompleteOrder(orders);
     }

@@ -19,7 +19,7 @@ public class OrderRepository(AppDbContext dbContext)
     {
         return dbContext.Orders
             .Include(o => o.OrderServices)
-            .ThenInclude(os => os.Service);
+            .ThenInclude(os => os.Service).ToList();
     }
 
     public IEnumerable<Order> GetPortfolioOrders()
@@ -27,7 +27,7 @@ public class OrderRepository(AppDbContext dbContext)
         return dbContext.Orders
             .Include(o => o.OrderServices)
             .ThenInclude(os => os.Service)
-            .Where(o => o.IsDone && o.IsInPortfolio);
+            .Where(o => o.IsDone && o.IsInPortfolio).ToList();  
     }
 
     public IEnumerable<Order> GetDoneOrders()
@@ -35,6 +35,6 @@ public class OrderRepository(AppDbContext dbContext)
         return dbContext.Orders
             .Include(o => o.OrderServices)
             .ThenInclude(os => os.Service)
-            .Where(o => o.IsDone);   
+            .Where(o => o.IsDone).ToList();   
     }
 }

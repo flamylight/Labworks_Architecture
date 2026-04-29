@@ -28,6 +28,10 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
                 orderEntity.TotalPrice += service.Price;
             }
+            else
+            {
+                throw new ArgumentException("Сервіс не знайдено");
+            }
         }
         
         uow.Orders.Add(orderEntity);
@@ -45,7 +49,12 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         var orderEntity = dto.ToEntity();
         var package = uow.Packages.GetById(orderEntity.PackageId!.Value);
 
-        foreach (var packageService in package!.PackageServices)
+        if (package == null)
+        {
+            throw new ArgumentException("Пакет послуг не знайдено");
+        }
+
+        foreach (var packageService in package.PackageServices)
         {
             if (packageService.Service != null)
             {
@@ -56,6 +65,10 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
                 });
 
                 orderEntity.TotalPrice += packageService.Service.Price;
+            }
+            else
+            {
+                throw new ArgumentException("Сервіс не знайдено");
             }
         }
         
@@ -71,7 +84,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
     {
         var orders = uow.Orders.GetAll();
         
-        return orders.Select(o => o.ToGetDto());
+        return orders.Select(o => o.ToGetDto()).ToList();
     }
 
     public void MarkAsDone(Guid orderId)
@@ -80,7 +93,12 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
         if (order == null)
         {
-            throw new Exception("Замовлення не знайдено");
+            throw new ArgumentException("Замовлення не знайдено");
+        }
+
+        if (order.IsDone)
+        {
+            throw new ArgumentException("Замовлення вже виконано");
         }
         
         order.IsDone = true;
@@ -93,13 +111,13 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
     public IEnumerable<GetOrderDto> GetPortfolioOrders()
     {
         var orders = uow.Orders.GetPortfolioOrders();
-        return orders.Select(o => o.ToGetDto());
+        return orders.Select(o => o.ToGetDto()).ToList();
     }
 
     public IEnumerable<GetOrderDto> GetDoneOrders()
     {
         var orders = uow.Orders.GetDoneOrders();
-        return orders.Select(o => o.ToGetDto());   
+        return orders.Select(o => o.ToGetDto()).ToList();   
     }
 
     public void MarkAsPortfolio(Guid orderId)
@@ -110,6 +128,17 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         {
             throw new ArgumentException("Такого замовлення не знайдено");
         }
+
+        if (order.IsInPortfolio)
+        {
+            throw new ArgumentException("Замовлення вже є в портфоліо");
+        }
+
+        if (!order.IsDone)
+        {
+            throw new ArgumentException("В портфоліо можна додавати лише виконані замовлення");
+        }
+        
         order.IsInPortfolio = true;
         uow.Orders.Update(order);
         uow.Save();

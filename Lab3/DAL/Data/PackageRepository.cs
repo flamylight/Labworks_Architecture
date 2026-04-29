@@ -10,7 +10,7 @@ public class PackageRepository(AppDbContext dbContext)
     {
         return dbContext.Packages
             .Include(p => p.PackageServices)
-            .ThenInclude(ps => ps.Service);
+            .ThenInclude(ps => ps.Service).ToList();
     }
 
     public override Package? GetById(Guid id)

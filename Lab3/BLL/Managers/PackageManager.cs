@@ -11,10 +11,10 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
     public GetPackageDto CreatePackage(CreatePackageDto dto)
     {
         ValidateNewPackage(dto);
-
+        
         var package = dto.ToEntity();
         
-        foreach (var serviceId in dto.Services)
+        foreach (var serviceId in dto.Services.Distinct())
         {
             var service = uow.Services.GetById(serviceId);
 
@@ -28,6 +28,10 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
 
                 package.TotalPrice += service.Price;
             }
+            else
+            {
+                throw new ArgumentException("Сервіс не знайдено");
+            }
         }
         
         uow.Packages.Add(package);
@@ -38,7 +42,7 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
 
     public IEnumerable<GetPackageDto> GetAllPackages()
     {
-        return uow.Packages.GetAll().Select(p => p.ToGetDto());
+        return uow.Packages.GetAll().Select(p => p.ToGetDto()).ToList();
     }
 
     private void ValidateNewPackage(CreatePackageDto dto)

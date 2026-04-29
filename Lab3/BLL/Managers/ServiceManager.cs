@@ -23,7 +23,7 @@ public class ServiceManager(IUnitOfWork uow) : IServiceManager
     {
         var services = uow.Services.GetAll();
         
-        return services.Select(s => s.ToGetDto());
+        return services.Select(s => s.ToGetDto()).ToList();
     }
 
     private void ValidateNewService(CreateServiceDto dto)
