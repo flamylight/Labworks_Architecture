@@ -15,10 +15,9 @@ class Program
         IGroupService groupService = new GroupService(universityData);
         IDisciplineService disciplineService = new DisciplineService(universityData);
         ITeacherService teacherService = new TeacherService(universityData);
-
-        var concreteDisciplineService = (DisciplineService)disciplineService;
+        
         var creditObserver = new CreditAwardObserver();
-        creditObserver.Subscribe(concreteDisciplineService);
+        creditObserver.Subscribe(disciplineService);
 
         UniversitySimulation simulation = new UniversitySimulation(studentService, groupService, disciplineService, teacherService);
 

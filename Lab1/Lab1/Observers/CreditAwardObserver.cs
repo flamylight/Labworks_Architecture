@@ -1,17 +1,17 @@
 using Lab1.Enums;
 using Lab1.Events;
-using Lab1.Services;
+using Lab1.Interfaces;
 
 namespace Lab1.Observers;
 
 public class CreditAwardObserver
 {
-    public void Subscribe(DisciplineService disciplineService)
+    public void Subscribe(IDisciplineService disciplineService)
     {
         disciplineService.ProgressUpdated += OnProgressUpdated;
     }
 
-    public void Unsubscribe(DisciplineService disciplineService)
+    public void Unsubscribe(IDisciplineService disciplineService)
     {
         disciplineService.ProgressUpdated -= OnProgressUpdated;
     }
@@ -37,7 +37,7 @@ public class CreditAwardObserver
         if (!hasCreditActivity)
             return;
 
-        if (sender is not DisciplineService disciplineService)
+        if (sender is not IDisciplineService disciplineService)
             return;
         
         bool allCompleted = AreAllNonCreditActivitiesCompleted(disciplineService, discipline, group);
@@ -56,7 +56,7 @@ public class CreditAwardObserver
         discipline.SetCredit(creditHours);
     }
 
-    private static bool AreAllNonCreditActivitiesCompleted(DisciplineService disciplineService, Discipline discipline, Group group)
+    private static bool AreAllNonCreditActivitiesCompleted(IDisciplineService disciplineService, Discipline discipline, Group group)
     {
         var plannedTypes = new List<ActivityType>();
         foreach (var activity in discipline.Activities)
