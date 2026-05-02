@@ -1,6 +1,5 @@
-using BLL.DTOs;
-
-namespace PL;
+namespace ConsoleUI;
+using Contracts.DTOs;
 
 public class MenuHelper
 {

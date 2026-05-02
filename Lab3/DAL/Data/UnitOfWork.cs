@@ -13,15 +13,20 @@ public class UnitOfWork: IUnitOfWork
     public IGenericRepository<Package> Packages { get; }
     public IGenericRepository<PackageService> PackageServices { get; }
 
-    public UnitOfWork(AppDbContext dbContext)
+    public UnitOfWork(AppDbContext dbContext,
+        IOrderRepository orders,
+        IGenericRepository<Service> services,
+        IGenericRepository<OrderService> orderServices,
+        IGenericRepository<Package> packages,
+        IGenericRepository<PackageService> packageServices)
     {
         _dbContext = dbContext;
-        
-        Orders = new OrderRepository(dbContext);
-        Services = new GenericRepository<Service>(dbContext);
-        OrderServices = new GenericRepository<OrderService>(dbContext);
-        Packages = new PackageRepository(dbContext);
-        PackageServices = new GenericRepository<PackageService>(dbContext);
+
+        Orders = orders;
+        Services = services;
+        OrderServices = orderServices;
+        Packages = packages;
+        PackageServices = packageServices;
     }
 
     public void Save()

@@ -1,8 +1,9 @@
-namespace BLL.DTOs;
+namespace Contracts.DTOs;
 
-public class CreateServiceDto
+public class CreatePackageDto
 {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public decimal Price { get; set; }
+    
+    public List<Guid> Services { get; set; } = new();
 }

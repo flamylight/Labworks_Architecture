@@ -1,4 +1,4 @@
-using BLL.DTOs;
+using Contracts.DTOs;
 
 namespace BLL.Interfaces;
 

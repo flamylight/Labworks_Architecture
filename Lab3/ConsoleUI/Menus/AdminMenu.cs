@@ -1,13 +1,11 @@
-using BLL.DTOs;
-using BLL.Interfaces;
+using System.Net.Http.Json;
+using Contracts.DTOs;
 
-namespace PL.Menus;
+namespace ConsoleUI.Menus;
 
-public class AdminMenu(IServiceManager serviceManager, 
-    IOrderManager orderManager,
-    IPackageManager packageManager)
+public class AdminMenu(HttpClient client)
 {
-    public void Run()
+    public async Task Run()
     {
         while (true)
         {
@@ -26,23 +24,23 @@ public class AdminMenu(IServiceManager serviceManager,
             switch (choice)
             {
                 case 1:
-                    CreateNewService();
+                    await CreateNewService();
                     break;
                 case 2:
-                    CreateNewPackage();
+                    await CreateNewPackage();
                     break;
                 case 3:
-                    ViewServices();
+                    await ViewServices();
                     MenuHelper.PressAnyKey();
                     break;
                 case 4:
-                    ViewPackages();
+                    await ViewPackages();
                     break;
                 case 5:
-                    ViewOrders();
+                    await ViewOrders();
                     break;
                 case 6:
-                    ViewPortfolio();
+                    await ViewPortfolio();
                     break;
                 case 0:
                     return;
@@ -50,13 +48,13 @@ public class AdminMenu(IServiceManager serviceManager,
         }
     }
 
-    private void CreateNewService()
+    private async Task CreateNewService()
     {
         var title = MenuHelper.ReadRequiredString("Назва: ");
         var description = MenuHelper.ReadRequiredString("Опис: ");
         var price = MenuHelper.ReadDecimal("Ціна: ");
 
-        var dto = new CreateServiceDto
+        var request = new CreateServiceDto
         {
             Title = title,
             Description = description,
@@ -65,7 +63,7 @@ public class AdminMenu(IServiceManager serviceManager,
 
         try
         {
-            serviceManager.CreateService(dto);
+            await client.PostAsJsonAsync("/api/Order/service", request);
             Console.WriteLine("Успішно створено!");
         }
         catch (Exception ex)
@@ -75,11 +73,11 @@ public class AdminMenu(IServiceManager serviceManager,
         MenuHelper.PressAnyKey();
     }
 
-    private void CreateNewPackage()
+    private async Task CreateNewPackage()
     {
-        var services = serviceManager.GetAllServices().ToList();
+        var services = await client.GetFromJsonAsync<List<GetServiceDto>>("/api/service");
 
-        if (!services.Any())
+        if (services == null || !services.Any())
         {
             Console.WriteLine("Послуг поки немає");
         }
@@ -88,18 +86,20 @@ public class AdminMenu(IServiceManager serviceManager,
             var title = MenuHelper.ReadRequiredString("Назва: ");
             var description = MenuHelper.ReadRequiredString("Опис: ");
 
-            ViewServices();
+            await ViewServices();
 
             var selectedServices = SelectServices(services);
 
             try
             {
-                packageManager.CreatePackage(new CreatePackageDto
+                var request = new CreatePackageDto
                 {
                     Title = title,
                     Description = description,
                     Services = selectedServices.Select(s => s.Id).ToList()
-                });
+                };
+                
+                await client.PostAsJsonAsync("/api/package", request);
                 Console.WriteLine("Успішно створено!");
             }
             catch (Exception ex)
@@ -110,11 +110,11 @@ public class AdminMenu(IServiceManager serviceManager,
         }
     }
 
-    private void ViewPackages()
+    private async Task ViewPackages()
     {
-        var packages = packageManager.GetAllPackages().ToList();
+        var packages = await client.GetFromJsonAsync<List<GetPackageDto>>("/api/package");
 
-        if (!packages.Any())
+        if (packages == null ||!packages.Any())
         {
             Console.WriteLine("Доступних пакетів «Під ключ» поки немає.");
         }
@@ -149,11 +149,11 @@ public class AdminMenu(IServiceManager serviceManager,
         MenuHelper.PressAnyKey();
     }
 
-    private void ViewPortfolio()
+    private async Task ViewPortfolio()
     {
-        var portfolioItems = orderManager.GetPortfolioOrders().ToList();
+        var portfolioItems = await client.GetFromJsonAsync<List<GetOrderDto>>("/api/order/portfolio");
 
-        if (!portfolioItems.Any())
+        if (portfolioItems == null || !portfolioItems.Any())
         {
             Console.WriteLine("Портфоліо порожнє");
         }
@@ -169,10 +169,10 @@ public class AdminMenu(IServiceManager serviceManager,
             }
         }
         
-        AddToPortfolio();
+        await AddToPortfolio();
     }
 
-    private void AddToPortfolio()
+    private async Task AddToPortfolio()
     {
         Console.WriteLine("Добавити роботу у портфоліо?");
         Console.WriteLine("1. Так\n" +
@@ -183,9 +183,9 @@ public class AdminMenu(IServiceManager serviceManager,
         switch (choice)
         {
             case 1:
-                var doneOrders = orderManager.GetDoneOrders().ToList();
+                var doneOrders = await client.GetFromJsonAsync<List<GetOrderDto>>("/api/order/done");
 
-                if (!doneOrders.Any())
+                if (doneOrders == null || !doneOrders.Any())
                 {
                     Console.WriteLine("Поки немає виконаних робіт");
                 }
@@ -201,7 +201,8 @@ public class AdminMenu(IServiceManager serviceManager,
 
                     try
                     {
-                        orderManager.MarkAsPortfolio(doneOrders[choiceOrder - 1].Id);
+                        await client.PutAsync(
+                            $"/api/order/{doneOrders[choiceOrder - 1].Id}/portfolio", null);
                         Console.WriteLine("Успішно додано!");
                     }
                     catch (Exception ex)
@@ -245,35 +246,38 @@ public class AdminMenu(IServiceManager serviceManager,
         return selectedServices;
     }
 
-    private void ViewServices()
+    private async Task ViewServices()
     {
-        var services = serviceManager.GetAllServices().ToList();
+        var services = await client.GetFromJsonAsync<List<GetServiceDto>>("api/service");
 
-        if (!services.Any())
+        if (services == null || !services.Any())
         {
             Console.WriteLine("Список порожній!");
         }
-
-        for (int i = 0; i < services.Count; i++)
+        else
         {
-            var s = services[i];
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{i+1} # {s.Title} ({s.Price:F2} грн)");
-            Console.ResetColor();
-        
-            if (!string.IsNullOrEmpty(s.Description))
+            for (int i = 0; i < services.Count; i++)
             {
-                Console.WriteLine($"  Опис: {s.Description}");
+                var s = services[i];
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"{i+1} # {s.Title} ({s.Price:F2} грн)");
+                Console.ResetColor();
+        
+                if (!string.IsNullOrEmpty(s.Description))
+                {
+                    Console.WriteLine($"  Опис: {s.Description}");
+                }
+                Console.WriteLine(new string('.', 40));
             }
-            Console.WriteLine(new string('.', 40));
         }
+        MenuHelper.PressAnyKey();
     }
 
-    private void ViewOrders()
+    private async Task ViewOrders()
     {
-        var orders = orderManager.GetAllOrders().ToList();
+        var orders = await client.GetFromJsonAsync<List<GetOrderDto>>("/api/order");
 
-        if (!orders.Any())
+        if (orders == null || !orders.Any())
         {
             Console.WriteLine("Список порожній!");
             MenuHelper.PressAnyKey();
@@ -289,7 +293,7 @@ public class AdminMenu(IServiceManager serviceManager,
         CompleteOrder(orders);
     }
 
-    private void CompleteOrder(List<GetOrderDto> orders)
+    private async void CompleteOrder(List<GetOrderDto> orders)
     {
         Console.WriteLine("1. Виконати замовлення\n" +
                           "0. Вийти");
@@ -311,7 +315,7 @@ public class AdminMenu(IServiceManager serviceManager,
                 {
                     try
                     {
-                        orderManager.MarkAsDone(orders[orderNumber - 1].Id);
+                        await client.PutAsync($"api/order/{orders[orderNumber - 1].Id}/done", null);
                         Console.WriteLine("Виконано!");
                     }
                     catch (Exception ex)

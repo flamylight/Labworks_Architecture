@@ -5,22 +5,13 @@ namespace DAL.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext() { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     
     public DbSet<Service> Services { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderService> OrderServices { get; set; }
     public DbSet<Package> Packages { get; set; }
     public DbSet<PackageService> PackageServices { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        optionsBuilder.UseNpgsql(
-            Environment.GetEnvironmentVariable("DB_CONNECTION")
-        );
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

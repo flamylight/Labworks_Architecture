@@ -1,5 +1,5 @@
-using BLL.DTOs;
 using BLL.Interfaces;
+using Contracts.DTOs;
 using BLL.Mappers;
 using DAL.Interfaces;
 using DAL.Models;

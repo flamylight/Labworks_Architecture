@@ -1,4 +1,4 @@
-using BLL.DTOs;
+using Contracts.DTOs;
 using BLL.Interfaces;
 using BLL.Mappers;
 using DAL.Interfaces;

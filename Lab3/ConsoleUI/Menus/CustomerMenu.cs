@@ -1,13 +1,11 @@
-using BLL.DTOs;
-using BLL.Interfaces;
+using System.Net.Http.Json;
+using Contracts.DTOs;
 
-namespace PL.Menus;
+namespace ConsoleUI.Menus;
 
-public class CustomerMenu(IServiceManager serviceManager,
-    IOrderManager orderManager,
-    IPackageManager packageManager)
+public class CustomerMenu(HttpClient client)
 {
-    public void Run()
+    public async Task  Run()
     {
         while (true)
         {
@@ -26,24 +24,24 @@ public class CustomerMenu(IServiceManager serviceManager,
             switch (choice)
             {
                 case 1:
-                    ViewServices();
+                    await ViewServices();
                     MenuHelper.PressAnyKey();
                     break;
                 case 2:
-                    MakeServiceOrder();
+                    await MakeServiceOrder();
                     break;
                 case 3:
-                    ViewPackages();
+                    await ViewPackages();
                     MenuHelper.PressAnyKey();
                     break;
                 case 4:
-                    MakePackageOrder();
+                    await MakePackageOrder();
                     break;
                 case 5:
-                    ViewOrders();
+                    await ViewOrders();
                     break;
                 case 6:
-                    ViewPortfolio();
+                    await ViewPortfolio();
                     break;
                 case 0:
                     return;
@@ -51,11 +49,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         }
     }
 
-    private List<GetServiceDto> ViewServices()
+    private async Task<List<GetServiceDto>?> ViewServices()
     {
-        var services = serviceManager.GetAllServices().ToList();
+        var services = await client.GetFromJsonAsync<List<GetServiceDto>>("api/Service");
 
-        if (!services.Any())
+        if (services == null || !services.Any())
         {
             Console.WriteLine("Список порожній!");
         }
@@ -79,11 +77,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         return services;
     }
 
-    private void MakeServiceOrder()
+    private async Task MakeServiceOrder()
     {
-        var services = serviceManager.GetAllServices().ToList();
+        var services = await ViewServices();
 
-        if (ViewServices().Count == 0)
+        if (services == null || !services.Any())
         {
             MenuHelper.PressAnyKey();
         }
@@ -106,7 +104,7 @@ public class CustomerMenu(IServiceManager serviceManager,
 
             try
             {
-                orderManager.CreateServiceOrder(orderDto);
+                await client.PostAsJsonAsync("api/order", orderDto);
             }
             catch (Exception ex)
             {
@@ -117,11 +115,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         }
     }
 
-    private void MakePackageOrder()
+    private async Task MakePackageOrder()
     {
-        var packages = packageManager.GetAllPackages().ToList();
+        var packages = await ViewPackages();
 
-        if (ViewPackages().Count == 0)
+        if (packages == null || !packages.Any())
         {
             MenuHelper.PressAnyKey();
         }
@@ -142,7 +140,7 @@ public class CustomerMenu(IServiceManager serviceManager,
 
             try
             {
-                orderManager.CreateTurnkeyOrder(orderDto);
+                await client.PostAsJsonAsync("api/order", orderDto);
                 Console.WriteLine("Створено!");
             }
             catch (Exception ex)
@@ -154,11 +152,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         }
     }
 
-    private void ViewOrders()
+    private async Task ViewOrders()
     {
-        var orders = orderManager.GetAllOrders().ToList();
+        var orders = await client.GetFromJsonAsync<List<GetOrderDto>>("api/order");
 
-        if (!orders.Any())
+        if (orders == null || !orders.Any())
         {
             Console.WriteLine("Список порожній!");
         }
@@ -172,11 +170,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         MenuHelper.PressAnyKey();
     }
     
-    private List<GetPackageDto> ViewPackages()
+    private async Task<List<GetPackageDto>?> ViewPackages()
     {
-        var packages = packageManager.GetAllPackages().ToList();
+        var packages = await client.GetFromJsonAsync<List<GetPackageDto>>("api/package");
 
-        if (!packages.Any())
+        if (packages == null || !packages.Any())
         {
             Console.WriteLine("Доступних пакетів «Під ключ» поки немає.");
         }
@@ -211,11 +209,11 @@ public class CustomerMenu(IServiceManager serviceManager,
         return packages;
     }
 
-    private void ViewPortfolio()
+    private async Task ViewPortfolio()
     {
-        var portfolioItems = orderManager.GetPortfolioOrders().ToList();
+        var portfolioItems = await client.GetFromJsonAsync<List<GetOrderDto>>("api/order/portfolio");
 
-        if (!portfolioItems.Any())
+        if (portfolioItems == null || !portfolioItems.Any())
         {
             Console.WriteLine("Портфоліо порожнє");
         }

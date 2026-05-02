@@ -1,4 +1,4 @@
-namespace BLL.DTOs;
+namespace Contracts.DTOs;
 
 public class OrderServiceItemDto
 {
