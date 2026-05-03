@@ -1,3 +1,4 @@
+using BLL.Exceptions;
 using Contracts.DTOs;
 using BLL.Interfaces;
 using BLL.Mappers;
@@ -30,7 +31,7 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
             }
             else
             {
-                throw new ArgumentException("Сервіс не знайдено");
+                throw new NotFoundException("Сервіс не знайдено");
             }
         }
         
@@ -49,17 +50,17 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
         {
-            throw new ArgumentException("Назва не можу бути порожньою");
+            throw new BadRequestException("Назва не можу бути порожньою");
         }
 
         if (string.IsNullOrWhiteSpace(dto.Description))
         {
-            throw new ArgumentException("Опис не може бути порожнім");
+            throw new BadRequestException("Опис не може бути порожнім");
         }
 
         if (dto.Services == null || dto.Services.Count == 0)
         {
-            throw new ArgumentException("Список сервісів не може бути порожнім");
+            throw new BadRequestException("Список сервісів не може бути порожнім");
         }
     }
 }

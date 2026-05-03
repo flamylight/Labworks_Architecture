@@ -6,8 +6,12 @@ using DAL.Data;
 using DAL.Interfaces;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.ExceptionsHandler;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
@@ -62,6 +66,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options => 
         options.SwaggerEndpoint("/openapi/v1.json", "Design studio"));   
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

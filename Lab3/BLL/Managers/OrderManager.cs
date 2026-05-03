@@ -1,3 +1,4 @@
+using BLL.Exceptions;
 using BLL.Interfaces;
 using Contracts.DTOs;
 using BLL.Mappers;
@@ -30,7 +31,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
             }
             else
             {
-                throw new ArgumentException("Сервіс не знайдено");
+                throw new NotFoundException("Сервіс не знайдено");
             }
         }
         
@@ -51,7 +52,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
         if (package == null)
         {
-            throw new ArgumentException("Пакет послуг не знайдено");
+            throw new NotFoundException("Пакет послуг не знайдено");
         }
 
         foreach (var packageService in package.PackageServices)
@@ -68,7 +69,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
             }
             else
             {
-                throw new ArgumentException("Сервіс не знайдено");
+                throw new NotFoundException("Сервіс не знайдено");
             }
         }
         
@@ -93,12 +94,12 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
         if (order == null)
         {
-            throw new ArgumentException("Замовлення не знайдено");
+            throw new NotFoundException("Замовлення не знайдено");
         }
 
         if (order.IsDone)
         {
-            throw new ArgumentException("Замовлення вже виконано");
+            throw new BadRequestException("Замовлення вже виконано");
         }
         
         order.IsDone = true;
@@ -110,20 +111,20 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
     public IEnumerable<GetOrderDto> GetPortfolioOrders()
     {
-        var orders = uow.Orders
+        return uow.Orders
             .QueryWithIncludes()
-            .Where(o => o.IsInPortfolio && o.IsDone);
-        
-        return orders.Select(o => o.ToGetDto()).ToList();
+            .Where(o => o.IsInPortfolio && o.IsDone)
+            .Select(o => o.ToGetDto())
+            .ToList();
     }
 
     public IEnumerable<GetOrderDto> GetDoneOrders()
     {
-        var orders = uow.Orders
+        return uow.Orders
             .QueryWithIncludes()
-            .Where(o => o.IsDone);
-        
-        return orders.Select(o => o.ToGetDto()).ToList();   
+            .Where(o => o.IsDone)
+            .Select(o => o.ToGetDto())
+            .ToList(); ;
     }
 
     public void MarkAsPortfolio(Guid orderId)
@@ -132,17 +133,17 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
         if (order == null)
         {
-            throw new ArgumentException("Такого замовлення не знайдено");
+            throw new BadRequestException("Такого замовлення не знайдено");
         }
 
         if (order.IsInPortfolio)
         {
-            throw new ArgumentException("Замовлення вже є в портфоліо");
+            throw new BadRequestException("Замовлення вже є в портфоліо");
         }
 
         if (!order.IsDone)
         {
-            throw new ArgumentException("В портфоліо можна додавати лише виконані замовлення");
+            throw new BadRequestException("В портфоліо можна додавати лише виконані замовлення");
         }
         
         order.IsInPortfolio = true;
@@ -154,17 +155,17 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
         {
-            throw new ArgumentException("Назва не може бути порожньою");
+            throw new BadRequestException("Назва не може бути порожньою");
         }
 
         if (string.IsNullOrWhiteSpace(dto.ClientDescription))
         {
-            throw new ArgumentException("Опис не може бути порожнім");
+            throw new BadRequestException("Опис не може бути порожнім");
         }
 
         if (dto.ServiceIds.Count == 0 || dto.ServiceIds.Count > 1)
         {
-            throw new ArgumentException("Замовлення має мати 1 послугу");
+            throw new BadRequestException("Замовлення має мати 1 послугу");
         }
     }
     
@@ -172,17 +173,17 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
         {
-            throw new ArgumentException("Назва не може бути порожньою");
+            throw new BadRequestException("Назва не може бути порожньою");
         }
 
         if (string.IsNullOrWhiteSpace(dto.ClientDescription))
         {
-            throw new ArgumentException("Опис не може бути порожнім");
+            throw new BadRequestException("Опис не може бути порожнім");
         }
 
         if (dto.PackageId == null)
         {
-            throw new ArgumentException("Не вибрано пакет послуг");
+            throw new BadRequestException("Не вибрано пакет послуг");
         }
     }
 }

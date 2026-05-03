@@ -1,3 +1,4 @@
+using BLL.Exceptions;
 using Contracts.DTOs;
 using BLL.Interfaces;
 using BLL.Mappers;
@@ -30,17 +31,17 @@ public class ServiceManager(IUnitOfWork uow) : IServiceManager
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
         {
-            throw new ArgumentException("Назва не може бути порожньою");
+            throw new BadRequestException("Назва не може бути порожньою");
         }
 
         if (string.IsNullOrWhiteSpace(dto.Description))
         {
-            throw new ArgumentException("Опис не може бути порожнім");
+            throw new BadRequestException("Опис не може бути порожнім");
         }
 
         if (dto.Price < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(dto.Price), "Ціна не може бути від'ємною");
+            throw new BadRequestException("Ціна не може бути від'ємною");
         }
     }
 }
