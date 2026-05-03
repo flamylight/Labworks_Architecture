@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace DAL.Interfaces;
 
 public interface IGenericRepository<T> where T: class
@@ -9,4 +7,5 @@ public interface IGenericRepository<T> where T: class
 
     public T? GetById(Guid id);
     void Update(T entity);
+    IQueryable<T> QueryWithIncludes();
 }

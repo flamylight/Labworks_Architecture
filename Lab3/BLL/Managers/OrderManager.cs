@@ -110,13 +110,19 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
 
     public IEnumerable<GetOrderDto> GetPortfolioOrders()
     {
-        var orders = uow.Orders.GetPortfolioOrders();
+        var orders = uow.Orders
+            .QueryWithIncludes()
+            .Where(o => o.IsInPortfolio && o.IsDone);
+        
         return orders.Select(o => o.ToGetDto()).ToList();
     }
 
     public IEnumerable<GetOrderDto> GetDoneOrders()
     {
-        var orders = uow.Orders.GetDoneOrders();
+        var orders = uow.Orders
+            .QueryWithIncludes()
+            .Where(o => o.IsDone);
+        
         return orders.Select(o => o.ToGetDto()).ToList();   
     }
 

@@ -24,4 +24,9 @@ public class GenericRepository<T>(AppDbContext dbContext)
     {
         dbContext.Set<T>().Update(entity);
     }
+
+    public virtual IQueryable<T> QueryWithIncludes()
+    {
+        return dbContext.Set<T>();
+    }
 }

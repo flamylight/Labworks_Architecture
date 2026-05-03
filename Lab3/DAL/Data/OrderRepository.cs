@@ -1,11 +1,10 @@
-using DAL.Interfaces;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data;
 
 public class OrderRepository(AppDbContext dbContext)
-: GenericRepository<Order>(dbContext), IOrderRepository
+: GenericRepository<Order>(dbContext)
 {
     public override Order? GetById(Guid id)
     {
@@ -22,19 +21,10 @@ public class OrderRepository(AppDbContext dbContext)
             .ThenInclude(os => os.Service).ToList();
     }
 
-    public IEnumerable<Order> GetPortfolioOrders()
+    public override IQueryable<Order> QueryWithIncludes()
     {
         return dbContext.Orders
             .Include(o => o.OrderServices)
-            .ThenInclude(os => os.Service)
-            .Where(o => o.IsDone && o.IsInPortfolio).ToList();  
-    }
-
-    public IEnumerable<Order> GetDoneOrders()
-    {
-        return dbContext.Orders
-            .Include(o => o.OrderServices)
-            .ThenInclude(os => os.Service)
-            .Where(o => o.IsDone).ToList();   
+            .ThenInclude(os => os.Service);
     }
 }

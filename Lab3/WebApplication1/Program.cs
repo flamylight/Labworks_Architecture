@@ -22,7 +22,6 @@ builder.Host.ConfigureContainer<ContainerBuilder>(c =>
             .InstancePerLifetimeScope();
         
         c.RegisterType<OrderRepository>()
-            .As<IOrderRepository>()
             .As<IGenericRepository<Order>>()
             .InstancePerLifetimeScope();
         
@@ -60,6 +59,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => 
+        options.SwaggerEndpoint("/openapi/v1.json", "Design studio"));   
 }
 
 app.UseHttpsRedirection();
