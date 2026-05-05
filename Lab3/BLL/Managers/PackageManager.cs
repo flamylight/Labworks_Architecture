@@ -1,19 +1,19 @@
+using AutoMapper;
 using BLL.Exceptions;
 using Contracts.DTOs;
 using BLL.Interfaces;
-using BLL.Mappers;
 using DAL.Interfaces;
 using DAL.Models;
 
 namespace BLL.Managers;
 
-public class PackageManager(IUnitOfWork uow) : IPackageManager
+public class PackageManager(IUnitOfWork uow, IMapper mapper) : IPackageManager
 {
     public GetPackageDto CreatePackage(CreatePackageDto dto)
     {
         ValidateNewPackage(dto);
         
-        var package = dto.ToEntity();
+        var package = mapper.Map<Package>(dto);
         
         foreach (var serviceId in dto.Services.Distinct())
         {
@@ -38,12 +38,12 @@ public class PackageManager(IUnitOfWork uow) : IPackageManager
         uow.Packages.Add(package);
         uow.Save();
         
-        return package.ToGetDto();
+        return mapper.Map<GetPackageDto>(package);
     }
 
     public IEnumerable<GetPackageDto> GetAllPackages()
     {
-        return uow.Packages.GetAll().Select(p => p.ToGetDto()).ToList();
+        return uow.Packages.GetAll().Select(p => mapper.Map<GetPackageDto>(p)).ToList();
     }
 
     private void ValidateNewPackage(CreatePackageDto dto)

@@ -31,7 +31,6 @@ public class AdminMenu(HttpClient client)
                     break;
                 case 3:
                     await ViewServices();
-                    MenuHelper.PressAnyKey();
                     break;
                 case 4:
                     await ViewPackages();

@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using BLL.Interfaces;
 using BLL.Managers;
+using BLL.Mapping;
 using DAL.Data;
 using DAL.Interfaces;
 using DAL.Models;
@@ -12,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddAutoMapper(cfg => { }, typeof(OrderProfile));
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 

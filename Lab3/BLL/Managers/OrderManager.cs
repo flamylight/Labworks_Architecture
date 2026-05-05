@@ -1,19 +1,19 @@
+using AutoMapper;
 using BLL.Exceptions;
 using BLL.Interfaces;
 using Contracts.DTOs;
-using BLL.Mappers;
 using DAL.Interfaces;
 using DAL.Models;
 
 namespace BLL.Managers;
 
-public class OrderManager(IUnitOfWork uow) : IOrderManager
+public class OrderManager(IUnitOfWork uow, IMapper mapper) : IOrderManager
 {
     public GetOrderDto CreateServiceOrder(CreateOrderDto dto)
     {
         ValidateNewServiceOrder(dto);
         
-        var orderEntity = dto.ToEntity();
+        var orderEntity = mapper.Map<Order>(dto);
 
         foreach (Guid serviceId in dto.ServiceIds)
         {
@@ -37,17 +37,15 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         
         uow.Orders.Add(orderEntity);
         uow.Save();
-
-        var orderGetDto = orderEntity.ToGetDto();
         
-        return orderGetDto;
+        return mapper.Map<GetOrderDto>(orderEntity);
     }
     
     public GetOrderDto CreateTurnkeyOrder(CreateOrderDto dto)
     {
         ValidateNewTurnkeyOrder(dto);
         
-        var orderEntity = dto.ToEntity();
+        var orderEntity = mapper.Map<Order>(dto);
         var package = uow.Packages.GetById(orderEntity.PackageId!.Value);
 
         if (package == null)
@@ -75,17 +73,15 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         
         uow.Orders.Add(orderEntity);
         uow.Save();
-
-        var orderGetDto = orderEntity.ToGetDto();
         
-        return orderGetDto;
+        return mapper.Map<GetOrderDto>(orderEntity);
     }
     
     public IEnumerable<GetOrderDto> GetAllOrders()
     {
         var orders = uow.Orders.GetAll();
         
-        return orders.Select(o => o.ToGetDto()).ToList();
+        return orders.Select(o => mapper.Map<GetOrderDto>(o)).ToList();
     }
 
     public void MarkAsDone(Guid orderId)
@@ -114,7 +110,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         return uow.Orders
             .QueryWithIncludes()
             .Where(o => o.IsInPortfolio && o.IsDone)
-            .Select(o => o.ToGetDto())
+            .Select(o => mapper.Map<GetOrderDto>(o))
             .ToList();
     }
 
@@ -123,7 +119,7 @@ public class OrderManager(IUnitOfWork uow) : IOrderManager
         return uow.Orders
             .QueryWithIncludes()
             .Where(o => o.IsDone)
-            .Select(o => o.ToGetDto())
+            .Select(o => mapper.Map<GetOrderDto>(o))
             .ToList(); ;
     }
 

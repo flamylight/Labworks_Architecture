@@ -1,30 +1,31 @@
+using AutoMapper;
 using BLL.Exceptions;
 using Contracts.DTOs;
 using BLL.Interfaces;
-using BLL.Mappers;
 using DAL.Interfaces;
+using DAL.Models;
 
 namespace BLL.Managers;
 
-public class ServiceManager(IUnitOfWork uow) : IServiceManager
+public class ServiceManager(IUnitOfWork uow, IMapper mapper) : IServiceManager
 {
     public GetServiceDto CreateService(CreateServiceDto dto)
     {
         ValidateNewService(dto);
 
-        var serviceEntity = dto.ToEntity();
+        var serviceEntity = mapper.Map<Service>(dto);
         
         uow.Services.Add(serviceEntity);
         uow.Save();
 
-        return serviceEntity.ToGetDto();
+        return mapper.Map<GetServiceDto>(serviceEntity);
     }
 
     public IEnumerable<GetServiceDto> GetAllServices()
     {
         var services = uow.Services.GetAll();
         
-        return services.Select(s => s.ToGetDto()).ToList();
+        return services.Select(s => mapper.Map<GetServiceDto>(s)).ToList();
     }
 
     private void ValidateNewService(CreateServiceDto dto)
