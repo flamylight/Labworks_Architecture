@@ -22,6 +22,9 @@ public class PackageProfile : Profile
                     ? src.Service.Price 
                     : 0));
 
-        CreateMap<Package, GetPackageDto>();
+        CreateMap<Package, GetPackageDto>()
+            .ForMember(dest => dest.PackageServicesItemDto,
+                opt =>
+                    opt.MapFrom(src => src.PackageServices));
     }
 }

@@ -20,7 +20,9 @@ public class OrderProfile : Profile
                     ? src.Service.Price 
                     : 0));
 
-        CreateMap<Order, GetOrderDto>();
+        CreateMap<Order, GetOrderDto>()
+            .ForMember(dest => dest.OrderServices, opt =>
+                opt.MapFrom(src => src.OrderServices));
         
         CreateMap<CreateOrderDto, Order>();
     }
