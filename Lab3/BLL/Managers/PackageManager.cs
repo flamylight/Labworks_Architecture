@@ -26,8 +26,6 @@ public class PackageManager(IUnitOfWork uow, IMapper mapper) : IPackageManager
                     PackageId = package.Id,
                     ServiceId = service.Id
                 });
-
-                package.TotalPrice += service.Price;
             }
             else
             {

@@ -11,7 +11,7 @@ public class ServiceManager(IUnitOfWork uow, IMapper mapper) : IServiceManager
 {
     public GetServiceDto CreateService(CreateServiceDto dto)
     {
-        ValidateNewService(dto);
+        ValidateNewService(dto.Title, dto.Description, dto.Price);
 
         var serviceEntity = mapper.Map<Service>(dto);
         
@@ -28,19 +28,40 @@ public class ServiceManager(IUnitOfWork uow, IMapper mapper) : IServiceManager
         return services.Select(s => mapper.Map<GetServiceDto>(s)).ToList();
     }
 
-    private void ValidateNewService(CreateServiceDto dto)
+    public GetServiceDto UpdateService(Guid id, UpdateServiceDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Title))
+        ValidateNewService(dto.Title, dto.Description, dto.Price);
+
+        var service = uow.Services.GetById(id);
+
+        if (service == null)
+        {
+            throw new NotFoundException("Сервіс не знайдено");
+        }
+
+        service.Title = dto.Title;
+        service.Description = dto.Description;
+        service.Price = dto.Price;
+        
+        uow.Services.Update(service);
+        uow.Save();
+        
+        return mapper.Map<GetServiceDto>(service);   
+    }
+
+    private void ValidateNewService(string title, string description, decimal price)
+    {
+        if (string.IsNullOrWhiteSpace(title))
         {
             throw new BadRequestException("Назва не може бути порожньою");
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Description))
+        if (string.IsNullOrWhiteSpace(description))
         {
             throw new BadRequestException("Опис не може бути порожнім");
         }
 
-        if (dto.Price < 0)
+        if (price < 0)
         {
             throw new BadRequestException("Ціна не може бути від'ємною");
         }

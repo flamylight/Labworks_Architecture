@@ -23,5 +23,13 @@ namespace WebApplication1.Controllers
             
             return Ok(services);
         }
+
+        [HttpPut("{id}")]
+        public ActionResult<GetServiceDto> UpdateService([FromRoute] Guid id, [FromBody] UpdateServiceDto dto)
+        {
+            var updatedService = serviceManager.UpdateService(id, dto);
+            
+            return Ok(updatedService);
+        }
     }
 }

@@ -17,9 +17,10 @@ public class AdminMenu(HttpClient client)
                               "4. Переглянути пакети послуг\n" +
                               "5. Переглянути замовлення\n" +
                               "6. Портфоліо\n" +
+                              "7. Оновити послугу\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 6);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 7);
 
             switch (choice)
             {
@@ -31,6 +32,7 @@ public class AdminMenu(HttpClient client)
                     break;
                 case 3:
                     await ViewServices();
+                    MenuHelper.PressAnyKey();
                     break;
                 case 4:
                     await ViewPackages();
@@ -40,6 +42,9 @@ public class AdminMenu(HttpClient client)
                     break;
                 case 6:
                     await ViewPortfolio();
+                    break;
+                case 7:
+                    await UpdateService();
                     break;
                 case 0:
                     return;
@@ -269,7 +274,6 @@ public class AdminMenu(HttpClient client)
                 Console.WriteLine(new string('.', 40));
             }
         }
-        MenuHelper.PressAnyKey();
     }
 
     private async Task ViewOrders()
@@ -325,5 +329,71 @@ public class AdminMenu(HttpClient client)
                 MenuHelper.PressAnyKey();
                 break;
         }
+    }
+    
+    private async Task UpdateService()
+    {
+        var services = await client.GetFromJsonAsync<List<GetServiceDto>>("api/service");
+
+        if (services == null || !services.Any())
+        {
+            Console.WriteLine("Послуг поки немає");
+            MenuHelper.PressAnyKey();
+            return;
+        }
+
+        await ViewServices();
+
+        var index = MenuHelper.ReadChoiceNumber("Виберіть сервіс для оновлення: ", 1, services.Count);
+        var selected = services[index - 1];
+
+        Console.Write($"Нова назва (натисніть Enter щоб залишити \"{selected.Title}\"): ");
+        var newTitle = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(newTitle)) newTitle = selected.Title;
+
+        Console.Write($"Новий опис (натисніть Enter щоб залишити): ");
+        var newDesc = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(newDesc)) newDesc = selected.Description;
+
+        Console.Write($"Нова ціна (натисніть Enter щоб залишити {selected.Price:F2}): ");
+        var priceInput = Console.ReadLine();
+        decimal newPrice;
+        if (string.IsNullOrWhiteSpace(priceInput))
+        {
+            newPrice = selected.Price;
+        }
+        else if (!decimal.TryParse(priceInput, out newPrice))
+        {
+            Console.WriteLine("Невірний формат числа. Операцію скасовано.");
+            MenuHelper.PressAnyKey();
+            return;
+        }
+
+        var updateRequest = new UpdateServiceDto
+        {
+            Title = newTitle,
+            Description = newDesc,
+            Price = newPrice
+        };
+
+        try
+        {
+            var response = await client.PutAsJsonAsync($"/api/service/{selected.Id}", updateRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Послугу успішно оновлено!");
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Помилка при оновленні: {response.StatusCode} - {content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        MenuHelper.PressAnyKey();
     }
 }

@@ -2,7 +2,7 @@ using System.Net;
 using BLL.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace WebApplication1.ExceptionsHandler;
+namespace WebApplication1.ExceptionsHandling;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

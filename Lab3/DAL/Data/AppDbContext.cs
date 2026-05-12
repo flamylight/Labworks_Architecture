@@ -32,10 +32,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(os => os.ServiceId)
             .OnDelete(DeleteBehavior.Restrict);
         
-        modelBuilder.Entity<Order>()
-            .Property(o => o.TotalPrice)
-            .HasPrecision(18, 2);
-        
         modelBuilder.Entity<Service>()
             .Property(s => s.Price)
             .HasPrecision(18, 2);
@@ -54,9 +50,5 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(ps => ps.ServiceId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        modelBuilder.Entity<Package>()
-            .Property(p => p.TotalPrice)
-            .HasPrecision(18, 2);
     }
 }

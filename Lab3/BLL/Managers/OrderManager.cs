@@ -26,8 +26,6 @@ public class OrderManager(IUnitOfWork uow, IMapper mapper) : IOrderManager
                     ServiceId = serviceId,
                     OrderId = orderEntity.Id
                 });
-
-                orderEntity.TotalPrice += service.Price;
             }
             else
             {
@@ -62,8 +60,6 @@ public class OrderManager(IUnitOfWork uow, IMapper mapper) : IOrderManager
                     ServiceId = packageService.ServiceId,
                     OrderId = orderEntity.Id
                 });
-
-                orderEntity.TotalPrice += packageService.Service.Price;
             }
             else
             {

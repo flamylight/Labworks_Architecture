@@ -7,7 +7,7 @@ using DAL.Data;
 using DAL.Interfaces;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.ExceptionsHandler;
+using WebApplication1.ExceptionsHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
