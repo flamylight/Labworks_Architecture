@@ -10,5 +10,6 @@ public interface IOrderManager
     GetOrderDto CreateTurnkeyOrder(CreateOrderDto dto);
     IEnumerable<GetOrderDto> GetPortfolioOrders();
     IEnumerable<GetOrderDto> GetDoneOrders();
+    void DeleteOrder(Guid orderId);
     void MarkAsPortfolio(Guid orderId);
 }

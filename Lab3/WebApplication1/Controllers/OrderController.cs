@@ -63,5 +63,13 @@ namespace WebApplication1.Controllers
             
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeleteOrder([FromRoute] Guid id)
+        {
+            orderManager.DeleteOrder(id);
+            
+            return NoContent();
+        }
     }
 }

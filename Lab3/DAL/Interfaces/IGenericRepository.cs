@@ -7,5 +7,6 @@ public interface IGenericRepository<T> where T: class
 
     public T? GetById(Guid id);
     void Update(T entity);
+    void Delete(T entity);
     IQueryable<T> QueryWithIncludes();
 }

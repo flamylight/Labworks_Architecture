@@ -142,6 +142,24 @@ public class OrderManager(IUnitOfWork uow, IMapper mapper) : IOrderManager
         uow.Orders.Update(order);
         uow.Save();
     }
+
+    public void DeleteOrder(Guid orderId)
+    {
+        var order = uow.Orders.GetById(orderId);
+
+        if (order == null)
+        {
+            throw new NotFoundException("Замовлення не знайдено!");
+        }
+
+        if (!order.IsDone)
+        {
+            throw new BadRequestException("Не можна видалити не виконане замовлення!");
+        }
+        
+        uow.Orders.Delete(order);
+        uow.Save();       
+    }
     
     private void ValidateNewServiceOrder(CreateOrderDto dto)
     {
