@@ -23,5 +23,21 @@ namespace WebApplication1.Controllers
             
             return Ok(packages);
         }
+
+        [HttpPut("{packageId}/services/{serviceId}")]
+        public ActionResult AddServiceToPackage([FromRoute] Guid packageId, [FromRoute] Guid serviceId)
+        {
+            packageManager.AddServiceToPackage(packageId, serviceId);
+            
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeletePackage([FromRoute] Guid id)
+        {
+            packageManager.DeletePackage(id);
+            
+            return NoContent();       
+        }
     }
 }

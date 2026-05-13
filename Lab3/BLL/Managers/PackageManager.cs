@@ -44,6 +44,65 @@ public class PackageManager(IUnitOfWork uow, IMapper mapper) : IPackageManager
         return uow.Packages.GetAll().Select(p => mapper.Map<GetPackageDto>(p)).ToList();
     }
 
+    public void AddServiceToPackage(Guid packageId, Guid serviceId)
+    {
+        var package = uow.Packages.GetById(packageId);
+
+        if (package == null)
+        {
+            throw new NotFoundException("Пакет не знайдено!");
+        }
+        
+        var service = uow.Services.GetById(serviceId);
+
+        if (service == null)
+        {
+            throw new BadRequestException("Послугу не знайдено!");
+        }
+
+        if (package.PackageServices.Any(ps => ps.ServiceId == serviceId))
+        {
+            throw new BadRequestException("Послуга вже є в пакеті!");
+        }
+        
+        package.PackageServices.Add(new PackageService
+        {
+            ServiceId = serviceId,
+            PackageId = packageId
+        });
+        
+        uow.Packages.Update(package);
+        uow.Save();       
+    }
+
+    public void DeletePackage(Guid packageId)
+    {
+        var package = uow.Packages.GetById(packageId);
+
+        if (package == null)
+        {
+            throw new NotFoundException("Пакет не знайдено!");
+        }
+
+        if (uow.Orders.GetAll().Any(o => o.PackageId == packageId && !o.IsDone))
+        {
+            throw new BadRequestException("Існують невиконані замовлення, що містять в собі цей пакет!");
+        }
+        
+        var orders = uow.Orders.GetAll();
+
+        foreach (var order in orders)
+        {
+            if (order.PackageId == packageId && !order.IsDone)
+            {
+                uow.Orders.Delete(order);
+            }
+        }
+        
+        uow.Packages.Delete(package);
+        uow.Save();      
+    }
+
     private void ValidateNewPackage(CreatePackageDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
