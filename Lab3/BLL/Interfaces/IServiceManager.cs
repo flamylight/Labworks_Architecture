@@ -7,4 +7,5 @@ public interface IServiceManager
     GetServiceDto CreateService(CreateServiceDto dto);
     IEnumerable<GetServiceDto> GetAllServices();
     GetServiceDto UpdateService(Guid id, UpdateServiceDto dto);
+    void DeleteService(Guid id);
 }

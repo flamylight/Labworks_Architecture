@@ -49,6 +49,44 @@ public class ServiceManager(IUnitOfWork uow, IMapper mapper) : IServiceManager
         return mapper.Map<GetServiceDto>(service);   
     }
 
+    public void DeleteService(Guid id)
+    {
+        var service = uow.Services.GetById(id);
+
+        if (service == null)
+        {
+            throw new NotFoundException("Послугу не знайдено!");
+        }
+
+        if (uow.Orders.GetAll().Any(o => !o.IsDone && o.OrderServices.Any(s => s.ServiceId == id)))
+        {
+            throw new BadRequestException("Існують невиконані замовлення, що містять цю послугу!");
+        }
+
+        var orders = uow.Orders.GetAll();
+
+        foreach (var order in orders)
+        {
+            if (order.OrderServices.Any(s => s.ServiceId == id))
+            {
+                uow.Orders.Delete(order);
+            }
+        }
+        
+        var packagesServices = uow.PackageServices.GetAll();
+
+        foreach (var packageService in packagesServices)
+        {
+            if (packageService.ServiceId == id)
+            {
+                uow.PackageServices.Delete(packageService);
+            }           
+        }
+        
+        uow.Services.Delete(service);
+        uow.Save();
+    }
+
     private void ValidateNewService(string title, string description, decimal price)
     {
         if (string.IsNullOrWhiteSpace(title))

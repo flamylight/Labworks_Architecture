@@ -31,5 +31,13 @@ namespace WebApplication1.Controllers
             
             return Ok(updatedService);
         }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeleteService([FromRoute] Guid id)
+        {
+            serviceManager.DeleteService(id);
+            
+            return NoContent();
+        }
     }
 }

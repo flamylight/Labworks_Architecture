@@ -18,9 +18,10 @@ public class AdminMenu(HttpClient client)
                               "5. Переглянути замовлення\n" +
                               "6. Портфоліо\n" +
                               "7. Оновити послугу\n" +
+                              "8. Видалити замовлення\n" +
                               "0. Вийти");
 
-            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 7);
+            var choice = MenuHelper.ReadChoiceNumber("Ваш вибір: ", 0, 8);
 
             switch (choice)
             {
@@ -45,6 +46,9 @@ public class AdminMenu(HttpClient client)
                     break;
                 case 7:
                     await UpdateService();
+                    break;
+                case 8:
+                    await DeleteOrder();
                     break;
                 case 0:
                     return;
@@ -392,6 +396,48 @@ public class AdminMenu(HttpClient client)
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+        }
+
+        MenuHelper.PressAnyKey();
+    }
+    
+    private async Task DeleteOrder()
+    {
+        var orders = await client.GetFromJsonAsync<List<GetOrderDto>>("/api/order");
+
+        if (orders == null || !orders.Any())
+        {
+            Console.WriteLine("Список порожній!");
+            MenuHelper.PressAnyKey();
+            return;
+        }
+        for (int i = 0; i < orders.Count; i++)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"[{i+1}] ");
+            Console.ResetColor();
+            MenuHelper.PrintOrderDetails(orders[i]);
+        }
+
+        var index = MenuHelper.ReadChoiceNumber("Виберіть замовлення для видалення: ", 1, orders.Count);
+        var selected = orders[index - 1];
+        
+        try
+        {
+            var response = await client.DeleteAsync($"/api/order/{selected.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Замовлення успішно видалено!");
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Помилка при видаленні: {content}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
         }
 
         MenuHelper.PressAnyKey();
