@@ -432,15 +432,7 @@ public class AdminMenu(HttpClient client)
         try
         {
             var response = await client.DeleteAsync($"/api/order/{selected.Id}");
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Замовлення успішно видалено!");
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadFromJsonAsync<ErrorDto>();
-                Console.WriteLine(errorContent!.Error);
-            }
+            await MenuHelper.CheckResponse(response);
         }
         catch (Exception ex)
         {
